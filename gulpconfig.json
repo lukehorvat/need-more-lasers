@@ -1,0 +1,19 @@
+{
+  "serverPort": 9000,
+  "sourceDir": "src",
+  "buildDir": "dist",
+  "index": "src/index.html",
+  "script": "src/scripts/index.js",
+  "style": "src/styles/index.scss",
+  "misc": [
+    "src/images/**/*.{ico,gif,jpg,png}",
+    "src/models/**/*.obj"
+  ],
+  "environments": [{
+    "name": "development",
+    "minify": false
+  }, {
+    "name": "production",
+    "minify": true
+  }]
+}
