@@ -11,7 +11,7 @@ export default class Ship extends THREE.Group {
       mesh.material = (() => {
         switch (mesh.name) {
           case "body":
-          case "pipe": return new THREE.MeshPhysicalMaterial({ color: "#005eff", reflectivity: 0.5, metalness: 0.4 });
+          case "pipe": return new THREE.MeshPhysicalMaterial({ color: "#004fd6", reflectivity: 0.5, metalness: 0.4 });
           case "glass": return new THREE.MeshPhysicalMaterial({ color: "#ffc400", reflectivity: 0.9, metalness: 0.3 });
           case "metal": return new THREE.MeshPhysicalMaterial({ color: "#003691", reflectivity: 0.1, metalness: 0.7 });
         }
