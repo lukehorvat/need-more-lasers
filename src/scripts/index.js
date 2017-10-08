@@ -2,14 +2,17 @@ import * as THREE from "three";
 import WindowResize from "three-window-resize";
 import each from "promise-each";
 import random from "lodash.random";
+import moment from "moment";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
+import * as sounds from "./sounds";
 import Ship from "./ship";
+import Laser from "./laser";
 
 const modelFilenames = [Ship.modelName];
 const modelCache = new ModelCache("models");
 
-let renderer, camera, scene, ambientLight, shipLight, ship, particles, t;
+let audioCtx, renderer, camera, scene, ambientLight, shipLight, ship, particles, t;
 
 init().then(render);
 
@@ -23,6 +26,8 @@ function init() {
   ))
   .then(() => {
     ThreeExtensions.install();
+
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -41,7 +46,6 @@ function init() {
     scene.add(shipLight);
 
     ship = new Ship(modelCache);
-    ship.rotation.y = THREE.Math.degToRad(180);
     scene.add(ship);
 
     particles = new THREE.Group();
@@ -50,7 +54,7 @@ function init() {
     window.addEventListener("keydown", event => {
       switch (event.key) {
         case " ":
-          console.log("Shoot!");
+          Laser.canSpawn = !Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 200;
           break;
         case "ArrowLeft":
           console.log("left");
@@ -66,24 +70,24 @@ function init() {
 }
 
 function render() {
-  ship.position.z += 1;
+  scene.children.filter(child => child.update).forEach(child => child.update());
 
   shipLight.position.x = ship.bbox.getCenter().x;
   shipLight.position.y = ship.bbox.max.y + 300;
-  shipLight.position.z = ship.bbox.min.z - 80;
+  shipLight.position.z = ship.bbox.max.z + 80;
   shipLight.target = ship;
 
   camera.position.x = ship.bbox.getCenter().x;
-  camera.position.y = ship.bbox.max.y + 10;
-  camera.position.z = ship.bbox.min.z - 10;
-  camera.lookAt(new THREE.Vector3(ship.bbox.getCenter().x, ship.bbox.getCenter().y, ship.bbox.max.z + 15));
+  camera.position.y = ship.bbox.max.y + 12;
+  camera.position.z = ship.bbox.max.z + 10;
+  camera.lookAt(new THREE.Vector3(ship.bbox.getCenter().x, ship.bbox.getCenter().y, ship.bbox.min.z - 15));
 
   particles.position.x = ship.bbox.getCenter().x;
   particles.position.y = ship.bbox.getCenter().y;
-  particles.position.z = ship.bbox.max.z + 100;
+  particles.position.z = ship.bbox.min.z - 100;
   Array.from(particles.children).forEach(particle => {
-    if (particle.getWorldPosition().z > camera.position.z) {
-      particle.position.z -= 1;
+    if (particle.getWorldPosition().z < camera.position.z) {
+      particle.position.z += 1;
     } else {
       particles.remove(particle);
     }
@@ -97,6 +101,23 @@ function render() {
     particle.position.y = random(-10, 20);
     particle.position.z = 0;
     particles.add(particle);
+  }
+
+  if (Laser.canSpawn) {
+    let laser1 = new Laser();
+    laser1.position.x = ship.bbox.min.x + 0.8;
+    laser1.position.y = ship.bbox.getCenter().y - 1;
+    laser1.position.z = ship.bbox.min.z - Math.abs(laser1.position.z - laser1.bbox.min.z) + 4.5;
+    scene.add(laser1);
+
+    let laser2 = laser1.clone();
+    laser2.position.x = ship.bbox.max.x - 0.8;
+    scene.add(laser2);
+
+    sounds.laser(audioCtx);
+
+    Laser.canSpawn = false;
+    Laser.lastSpawnTime = moment();
   }
 
   t++;

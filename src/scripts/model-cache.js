@@ -15,8 +15,8 @@ export default class extends Map {
     if (value !== undefined) return super.set(key, value);
 
     return new Promise(resolve => {
-      let modelLoader = new THREE.OBJLoader();
-      modelLoader.load(`${this.path}/${key}`, model => {
+      let loader = new THREE.OBJLoader();
+      loader.load(`${this.path}/${key}`, model => {
         this.set(key, model);
         resolve();
       });

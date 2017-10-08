@@ -22,4 +22,8 @@ export default class Ship extends THREE.Group {
     this.model.position.z = 0;
     this.add(this.model);
   }
+
+  update() {
+    this.position.z -= 1;
+  }
 }
