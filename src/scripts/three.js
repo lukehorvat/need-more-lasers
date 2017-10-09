@@ -10,4 +10,15 @@ export function install() {
       return new THREE.Box3().setFromObject(this);
     }
   });
+
+  Object.defineProperty(THREE.Camera.prototype, "mouseToWorldPosition", {
+    value: function(mouseX, mouseY, z) {
+      // See: https://stackoverflow.com/a/13091694
+      let vector = new THREE.Vector3(mouseX, mouseY);
+      vector.unproject(this);
+      let dir = vector.sub(this.position).normalize();
+      let distance = this.position.z - z / dir.z;
+      return this.position.clone().add(dir.multiplyScalar(distance));
+    }
+  });
 }
