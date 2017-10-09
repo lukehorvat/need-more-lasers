@@ -6,24 +6,21 @@ import moment from "moment";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
 import * as sounds from "./sounds";
-import Turret from "./turret";
+import Mouse from "./mouse";
+import Keyboard from "./keyboard";
 import Reticule from "./reticule";
+import Turret from "./turret";
 import Laser from "./laser";
+import Particle from "./particle";
 
-const modelFilenames = [Turret.modelName, Reticule.modelName];
-const modelCache = new ModelCache("models");
-
+let modelFilenames = [Turret.modelName, Reticule.modelName];
+let modelCache = new ModelCache("models");
 let audioCtx;
 let renderer;
 let camera;
-let scene;
-let ambientLight;
-let turret;
-let turretLight;
-let particles;
-let reticule;
 let mouse;
 let keyboard;
+let scene;
 let t;
 
 init().then(render);
@@ -49,148 +46,80 @@ function init() {
 
     WindowResize(renderer, camera); // Automatically handle window resize events.
 
+    mouse = new Mouse(renderer, camera);
+    mouse.x = 0;
+    mouse.y = -0.1;
+
+    keyboard = new Keyboard();
+
     scene = new THREE.Scene();
 
-    ambientLight = new THREE.AmbientLight("#ffffff");
+    let ambientLight = new THREE.AmbientLight("#ffffff");
     scene.add(ambientLight);
 
-    turret = new Turret(modelCache);
+    let reticule = new Reticule(modelCache);
+    reticule.name = "reticule";
+    scene.add(reticule);
+
+    let turret = new Turret(modelCache);
+    turret.name = "turret";
     turret.position.y = -25; // TODO: Should calculate y based on width of visible rectangle at turret.position.z.
     turret.position.z = -50;
     scene.add(turret);
 
-    turretLight = new THREE.SpotLight("#aaaaaa");
+    let turretLight = new THREE.SpotLight("#aaaaaa");
     turretLight.position.x = turret.bbox.getCenter().x;
     turretLight.position.y = turret.bbox.max.y + 300;
     turretLight.position.z = turret.bbox.getCenter().z;
     turretLight.target = turret;
     scene.add(turretLight);
 
-    reticule = new Reticule(modelCache);
-    scene.add(reticule);
-
-    particles = new THREE.Group();
-    scene.add(particles);
-
-    mouse = new THREE.Vector2(0, -0.1);
-
-    keyboard = {
-      w: false,
-      a: false,
-      s: false,
-      d: false,
-      space: false,
-      shift: false,
-    };
-
-    window.addEventListener("keydown", event => {
-      switch (event.key) {
-        case "Shift":
-          keyboard.shift = true;
-          break;
-        case " ":
-          keyboard.space = true;
-          break;
-        case "w":
-        case "ArrowUp":
-          keyboard.w = true;
-          break;
-        case "a":
-        case "ArrowLeft":
-          keyboard.a = true;
-          break;
-        case "s":
-        case "ArrowDown":
-          keyboard.s = true;
-          break;
-        case "d":
-        case "ArrowRight":
-          keyboard.d = true;
-          break;
-      }
-    }, false);
-
-    window.addEventListener("keyup", event => {
-      switch (event.key) {
-        case "Shift":
-          keyboard.shift = false;
-          break;
-        case " ":
-          keyboard.space = false;
-          break;
-        case "w":
-        case "ArrowUp":
-          keyboard.w = false;
-          break;
-        case "a":
-        case "ArrowLeft":
-          keyboard.a = false;
-          break;
-        case "s":
-        case "ArrowDown":
-          keyboard.s = false;
-          break;
-        case "d":
-        case "ArrowRight":
-          keyboard.d = false;
-          break;
-      }
-    }, false);
-
-    window.addEventListener("mousemove", event => {
-      mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
-      mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-    }, false);
-
     t = 0;
   });
 }
 
 function render() {
-  scene.children.filter(child => child.update).forEach(child => child.update());
+  let reticule = scene.children.find(child => child.name === "reticule");
+  let turret = scene.children.find(child => child.name === "turret");
+  let lasers = scene.children.filter(child => child.name === "laser");
+  let particles = scene.children.filter(child => child.name === "particle");
 
-  reticule.position.fromArray(camera.mouseToWorldPosition(mouse.x, mouse.y, turret.bbox.min.z - 50).toArray());
+  reticule.position.fromArray(mouse.getPosition(turret.bbox.min.z - 50).toArray());
   reticule.lookAt(turret.bbox.getCenter());
+
   turret.lookAt(reticule.position);
 
-  particles.position.x = camera.position.x;
-  particles.position.y = camera.position.y;
-  particles.position.z = turret.bbox.min.z - 10;
-  Array.from(particles.children).forEach(particle => {
+  lasers.forEach(laser => {
+    laser.position.z -= 18;
+  });
+
+  particles.forEach(particle => {
     if (particle.getWorldPosition().z < camera.position.z) {
       particle.position.z += 0.6;
       particle.rotation.x = THREE.Math.degToRad(10);
     } else {
-      particles.remove(particle);
+      scene.remove(particle);
     }
   });
 
-  let particle = new THREE.Mesh();
-  particle.material = new THREE.MeshToonMaterial({ color: "#dddddd", transparent: true, opacity: 0.5, });
-  particle.geometry = new THREE.SphereGeometry(0.08, 3, 2);
-  particle.position.x = random(-100, 100);
-  particle.position.y = random(-20, 20);
-  particle.position.z = 0;
-  particles.add(particle);
+  let particle = new Particle();
+  particle.name = "particle";
+  particle.position.x = camera.position.x + random(-100, 100);
+  particle.position.y = camera.position.y + random(-20, 20);
+  particle.position.z = turret.bbox.min.z - 10;
+  scene.add(particle);
 
-  if (keyboard.w && turret.position.y < 25) {
-    // turret.position.y += 1;
-  }
-
-  if (keyboard.a && turret.position.x > -50) {
+  if ((keyboard.a || keyboard.left) && turret.position.x > -50) {
     turret.position.x -= 1;
   }
 
-  if (keyboard.s && turret.position.y > -25) {
-    // turret.position.y -= 1;
-  }
-
-  if (keyboard.d && turret.position.x < 50) {
+  if ((keyboard.d || keyboard.right) && turret.position.x < 50) {
     turret.position.x += 1;
   }
 
   if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 200)) {
     let laser1 = new Laser();
+    laser1.name = "laser";
     laser1.position.x = turret.bbox.min.x + 0.8;
     laser1.position.y = turret.bbox.getCenter().y - 1;
     laser1.position.z = turret.bbox.min.z - Math.abs(laser1.position.z - laser1.bbox.min.z) + 4.5;
