@@ -7,9 +7,10 @@ import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
 import * as sounds from "./sounds";
 import Turret from "./turret";
+import Reticule from "./reticule";
 import Laser from "./laser";
 
-const modelFilenames = [Turret.modelName];
+const modelFilenames = [Turret.modelName, Reticule.modelName];
 const modelCache = new ModelCache("models");
 
 let audioCtx;
@@ -20,6 +21,7 @@ let ambientLight;
 let turret;
 let turretLight;
 let particles;
+let reticule;
 let mouse;
 let keyboard;
 let t;
@@ -53,7 +55,7 @@ function init() {
     scene.add(ambientLight);
 
     turret = new Turret(modelCache);
-    turret.position.y = -25;
+    turret.position.y = -25; // TODO: Should calculate y based on width of visible rectangle at turret.position.z.
     turret.position.z = -50;
     scene.add(turret);
 
@@ -64,10 +66,13 @@ function init() {
     turretLight.target = turret;
     scene.add(turretLight);
 
+    reticule = new Reticule(modelCache);
+    scene.add(reticule);
+
     particles = new THREE.Group();
     scene.add(particles);
 
-    mouse = new THREE.Vector2(0, 0);
+    mouse = new THREE.Vector2(0, -0.1);
 
     keyboard = {
       w: false,
@@ -144,15 +149,17 @@ function init() {
 function render() {
   scene.children.filter(child => child.update).forEach(child => child.update());
 
-  let mousePosition = camera.mouseToWorldPosition(mouse.x, mouse.y, -1000);
-  turret.lookAt(mousePosition);
+  reticule.position.fromArray(camera.mouseToWorldPosition(mouse.x, mouse.y, turret.bbox.min.z - 50).toArray());
+  reticule.lookAt(turret.bbox.getCenter());
+  turret.lookAt(reticule.position);
 
   particles.position.x = camera.position.x;
   particles.position.y = camera.position.y;
-  particles.position.z = camera.position.z - 200;
+  particles.position.z = turret.bbox.min.z - 10;
   Array.from(particles.children).forEach(particle => {
     if (particle.getWorldPosition().z < camera.position.z) {
-      particle.position.z += 1;
+      particle.position.z += 0.6;
+      particle.rotation.x = THREE.Math.degToRad(10);
     } else {
       particles.remove(particle);
     }
@@ -160,7 +167,7 @@ function render() {
 
   let particle = new THREE.Mesh();
   particle.material = new THREE.MeshToonMaterial({ color: "#dddddd", transparent: true, opacity: 0.5, });
-  particle.geometry = new THREE.SphereGeometry(0.1, 3, 2);
+  particle.geometry = new THREE.SphereGeometry(0.08, 3, 2);
   particle.position.x = random(-100, 100);
   particle.position.y = random(-20, 20);
   particle.position.z = 0;
@@ -171,7 +178,7 @@ function render() {
   }
 
   if (keyboard.a && turret.position.x > -50) {
-    turret.position.x -= 4;
+    turret.position.x -= 1;
   }
 
   if (keyboard.s && turret.position.y > -25) {
@@ -179,7 +186,7 @@ function render() {
   }
 
   if (keyboard.d && turret.position.x < 50) {
-    turret.position.x += 4;
+    turret.position.x += 1;
   }
 
   if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 200)) {

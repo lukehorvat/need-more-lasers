@@ -17,7 +17,7 @@ export function install() {
       let vector = new THREE.Vector3(mouseX, mouseY);
       vector.unproject(this);
       let dir = vector.sub(this.position).normalize();
-      let distance = this.position.z - z / dir.z;
+      let distance = (z - this.position.z) / dir.z;
       return this.position.clone().add(dir.multiplyScalar(distance));
     }
   });

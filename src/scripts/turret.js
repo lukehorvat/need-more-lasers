@@ -20,6 +20,7 @@ export default class Turret extends THREE.Group {
     this.model.position.x = 0;
     this.model.position.y = 0;
     this.model.position.z = 0;
+    this.model.rotation.y = THREE.Math.degToRad(180); // Model faces the wrong way; correct it.
     this.add(this.model);
   }
 }
