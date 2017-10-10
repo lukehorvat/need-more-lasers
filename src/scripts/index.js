@@ -13,7 +13,7 @@ import Turret from "./turret";
 import Laser from "./laser";
 import Particle from "./particle";
 
-let modelFilenames = [Turret.modelName, Reticule.modelName];
+let modelFilenames = [Turret.modelName, Reticule.modelName, Laser.modelName];
 let modelCache = new ModelCache("models");
 let audioCtx;
 let renderer;
@@ -21,7 +21,7 @@ let camera;
 let mouse;
 let keyboard;
 let scene;
-let t;
+let clock;
 
 init().then(render);
 
@@ -54,15 +54,15 @@ function init() {
 
     scene = new THREE.Scene();
 
+    clock = new THREE.Clock();
+
     let ambientLight = new THREE.AmbientLight("#ffffff");
     scene.add(ambientLight);
 
     let reticule = new Reticule(modelCache);
-    reticule.name = "reticule";
     scene.add(reticule);
 
     let turret = new Turret(modelCache);
-    turret.name = "turret";
     turret.position.y = -25; // TODO: Should calculate y based on width of visible rectangle at turret.position.z.
     turret.position.z = -50;
     scene.add(turret);
@@ -73,68 +73,65 @@ function init() {
     turretLight.position.z = turret.bbox.getCenter().z;
     turretLight.target = turret;
     scene.add(turretLight);
-
-    t = 0;
   });
 }
 
 function render() {
-  let reticule = scene.children.find(child => child.name === "reticule");
-  let turret = scene.children.find(child => child.name === "turret");
-  let lasers = scene.children.filter(child => child.name === "laser");
-  let particles = scene.children.filter(child => child.name === "particle");
+  let delta = clock.getDelta();
+  let reticule = scene.children.find(child => child instanceof Reticule);
+  let turret = scene.children.find(child => child instanceof Turret);
+  let lasers = scene.children.filter(child => child instanceof Laser);
+  let particles = scene.children.filter(child => child instanceof Particle);
 
-  reticule.position.fromArray(mouse.getPosition(turret.bbox.min.z - 50).toArray());
+  reticule.position.copy(mouse.getPosition(turret.bbox.min.z - 5000));
   reticule.lookAt(turret.bbox.getCenter());
 
   turret.lookAt(reticule.position);
 
   lasers.forEach(laser => {
-    laser.position.z -= 18;
+    laser.position.addScaledVector(laser.direction, laser.speed * delta);
   });
 
   particles.forEach(particle => {
     if (particle.getWorldPosition().z < camera.position.z) {
-      particle.position.z += 0.6;
-      particle.rotation.x = THREE.Math.degToRad(10);
+      particle.position.z += particle.speed * delta;
+      particle.rotation.x = THREE.Math.degToRad(10) * delta;
     } else {
       scene.remove(particle);
     }
   });
 
   let particle = new Particle();
-  particle.name = "particle";
   particle.position.x = camera.position.x + random(-100, 100);
   particle.position.y = camera.position.y + random(-20, 20);
   particle.position.z = turret.bbox.min.z - 10;
   scene.add(particle);
 
   if ((keyboard.a || keyboard.left) && turret.position.x > -50) {
-    turret.position.x -= 1;
+    turret.position.x -= turret.speed * delta;
   }
 
   if ((keyboard.d || keyboard.right) && turret.position.x < 50) {
-    turret.position.x += 1;
+    turret.position.x += turret.speed * delta;
   }
 
-  if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 200)) {
-    let laser1 = new Laser();
-    laser1.name = "laser";
-    laser1.position.x = turret.bbox.min.x + 0.8;
-    laser1.position.y = turret.bbox.getCenter().y - 1;
-    laser1.position.z = turret.bbox.min.z - Math.abs(laser1.position.z - laser1.bbox.min.z) + 4.5;
+  if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 300)) {
+    let laser1 = new Laser(modelCache);
+    laser1.position.copy(turret.localToWorld(turret.leftGunPosition));
+    laser1.direction = reticule.bbox.getCenter().sub(laser1.position).normalize();
+    laser1.lookAt(reticule.bbox.getCenter());
     scene.add(laser1);
 
-    let laser2 = laser1.clone();
-    laser2.position.x = turret.bbox.max.x - 0.8;
+    let laser2 = new Laser(modelCache);
+    laser2.position.copy(turret.localToWorld(turret.rightGunPosition));
+    laser2.direction = reticule.bbox.getCenter().sub(laser2.position).normalize();
+    laser2.lookAt(reticule.bbox.getCenter());
     scene.add(laser2);
 
     sounds.laser(audioCtx);
 
     Laser.lastSpawnTime = moment();
   }
-
-  t++;
 
   // Render the scene!
   renderer.render(scene, camera);

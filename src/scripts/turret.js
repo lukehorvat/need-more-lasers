@@ -6,6 +6,7 @@ export default class Turret extends THREE.Group {
   constructor(modelCache) {
     super();
 
+    this.speed = 60;
     this.model = modelCache.get(Turret.modelName).clone();
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
@@ -17,10 +18,15 @@ export default class Turret extends THREE.Group {
         }
       })();
     });
-    this.model.position.x = 0;
-    this.model.position.y = 0;
-    this.model.position.z = 0;
     this.model.rotation.y = THREE.Math.degToRad(180); // Model faces the wrong way; correct it.
     this.add(this.model);
+  }
+
+  get leftGunPosition() {
+    return new THREE.Vector3(5, 0.5, 4);
+  }
+
+  get rightGunPosition() {
+    return new THREE.Vector3(-5, 0.5, 4);
   }
 }
