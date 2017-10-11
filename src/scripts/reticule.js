@@ -1,12 +1,13 @@
 import * as THREE from "three";
+import ModelCache from "./model-cache";
 
 export default class Reticule extends THREE.Group {
   static modelName = "reticule.obj";
 
-  constructor(modelCache) {
+  constructor() {
     super();
 
-    this.model = modelCache.get(Reticule.modelName).clone();
+    this.model = ModelCache.get(Reticule.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = new THREE.MeshToonMaterial({ color: "#00ff00", transparent: true, opacity: 0.7, });
     });

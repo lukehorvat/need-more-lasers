@@ -1,14 +1,19 @@
 import Map from "es6-map/polyfill"; // Chrome has problems with extending Map. :(
 import * as THREE from "three";
 import OBJLoader from "three-obj-loader";
+import each from "promise-each";
 
 OBJLoader(THREE);
 
-export default class extends Map {
-  constructor(path = "") {
-    super();
+class ModelCache extends Map {
+  init(modelNames) {
+    return Promise.resolve(modelNames).then(each(modelName => this.set(modelName)));
+  }
 
-    this.path = path;
+  get(key) {
+    let value = super.get(key);
+    if (value) value = value.clone();
+    return value;
   }
 
   set(key, value) {
@@ -16,10 +21,12 @@ export default class extends Map {
 
     return new Promise(resolve => {
       let loader = new THREE.OBJLoader();
-      loader.load(`${this.path}/${key}`, model => {
+      loader.load(`models/${key}`, model => {
         this.set(key, model);
         resolve();
       });
     });
   }
 }
+
+export default new ModelCache();

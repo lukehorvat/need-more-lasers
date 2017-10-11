@@ -1,14 +1,15 @@
 import * as THREE from "three";
 import random from "lodash.random";
+import ModelCache from "./model-cache";
 
 export default class Enemy extends THREE.Group {
   static modelName = "enemy.obj";
 
-  constructor(modelCache) {
+  constructor() {
     super();
 
     this.speed = 300;
-    this.model = modelCache.get(Enemy.modelName).clone();
+    this.model = ModelCache.get(Enemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
         switch (mesh.name) {

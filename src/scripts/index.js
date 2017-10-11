@@ -1,8 +1,6 @@
 import * as THREE from "three";
 import WindowResize from "three-window-resize";
-import each from "promise-each";
 import random from "lodash.random";
-import moment from "moment";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
 import * as sounds from "./sounds";
@@ -14,8 +12,6 @@ import Enemy from "./enemy";
 import Laser from "./laser";
 import Particle from "./particle";
 
-let modelFilenames = [Reticule.modelName, Turret.modelName, Enemy.modelName, Laser.modelName];
-let modelCache = new ModelCache("models");
 let audioCtx;
 let renderer;
 let camera;
@@ -27,14 +23,12 @@ let clock;
 init().then(render);
 
 function init() {
-  return Promise
-  .resolve()
-  .then(() => (
-    Promise.resolve(modelFilenames).then(each(modelFilename => (
-      modelCache.set(modelFilename)
-    )))
-  ))
-  .then(() => {
+  return ModelCache.init([
+    Reticule.modelName,
+    Turret.modelName,
+    Enemy.modelName,
+    Laser.modelName
+  ]).then(() => {
     ThreeExtensions.install();
 
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -57,10 +51,10 @@ function init() {
 
     clock = new THREE.Clock();
 
-    let reticule = new Reticule(modelCache);
+    let reticule = new Reticule();
     scene.add(reticule);
 
-    let turret = new Turret(modelCache);
+    let turret = new Turret();
     turret.position.y = -25; // TODO: Should calculate y based on width of visible rectangle at turret.position.z.
     turret.position.z = -50;
     scene.add(turret);
@@ -81,6 +75,7 @@ function init() {
 
 function render() {
   let delta = clock.getDelta();
+  let elapsedTime = clock.getElapsedTime();
   let reticule = scene.children.find(child => child instanceof Reticule);
   let turret = scene.children.find(child => child instanceof Turret);
   let enemies = scene.children.filter(child => child instanceof Enemy);
@@ -118,7 +113,7 @@ function render() {
   });
 
   if (random(0, 100) < 8) {
-    let enemy = new Enemy(modelCache);
+    let enemy = new Enemy();
     enemy.position.x = camera.position.x + random(-400, 400);
     enemy.position.y = camera.position.y + random(-100, 100);
     enemy.position.z = turret.bbox.min.z - 2000;
@@ -139,14 +134,14 @@ function render() {
     turret.position.x += turret.speed * delta;
   }
 
-  if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 250)) {
-    let laser1 = new Laser(modelCache);
+  if (keyboard.space && elapsedTime - Laser.lastSpawnTime > 0.25) {
+    let laser1 = new Laser();
     laser1.position.copy(turret.localToWorld(turret.leftGunPosition));
     laser1.direction = reticule.bbox.getCenter().sub(laser1.position).normalize();
     laser1.lookAt(reticule.bbox.getCenter());
     scene.add(laser1);
 
-    let laser2 = new Laser(modelCache);
+    let laser2 = new Laser();
     laser2.position.copy(turret.localToWorld(turret.rightGunPosition));
     laser2.direction = reticule.bbox.getCenter().sub(laser2.position).normalize();
     laser2.lookAt(reticule.bbox.getCenter());
@@ -154,7 +149,7 @@ function render() {
 
     sounds.laser(audioCtx);
 
-    Laser.lastSpawnTime = moment();
+    Laser.lastSpawnTime = elapsedTime;
   }
 
   // Render the scene!

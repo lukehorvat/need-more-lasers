@@ -1,13 +1,14 @@
 import * as THREE from "three";
+import ModelCache from "./model-cache";
 
 export default class Turret extends THREE.Group {
   static modelName = "turret.obj";
 
-  constructor(modelCache) {
+  constructor() {
     super();
 
     this.speed = 60;
-    this.model = modelCache.get(Turret.modelName).clone();
+    this.model = ModelCache.get(Turret.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
         switch (mesh.name) {
