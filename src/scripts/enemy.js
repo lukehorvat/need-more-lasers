@@ -8,7 +8,7 @@ export default class Enemy extends THREE.Group {
   constructor() {
     super();
 
-    this.speed = 300;
+    this.speed = random(200, 400);
     this.model = ModelCache.get(Enemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
@@ -20,7 +20,7 @@ export default class Enemy extends THREE.Group {
       })();
     });
     this.model.rotation.y = THREE.Math.degToRad(180); // Model faces the wrong way; correct it.
-    this.model.scale.x = this.model.scale.y = this.model.scale.z = random(0.1, 2);
+    this.model.scale.x = this.model.scale.y = this.model.scale.z = 2;
     this.add(this.model);
   }
 }
