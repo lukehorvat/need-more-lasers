@@ -7,7 +7,7 @@ import * as sounds from "./sounds";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
-import Turret from "./turret";
+import Gun from "./gun";
 import Enemy from "./enemy";
 import Laser from "./laser";
 import Particle from "./particle";
@@ -25,7 +25,7 @@ init().then(render);
 function init() {
   return ModelCache.init([
     Reticule.modelName,
-    Turret.modelName,
+    Gun.modelName,
     Enemy.modelName,
     Laser.modelName
   ]).then(() => {
@@ -54,19 +54,23 @@ function init() {
     let reticule = new Reticule();
     scene.add(reticule);
 
-    let turret = new Turret();
-    turret.position.y = -25; // TODO: Should calculate y based on width of visible rectangle at turret.position.z.
-    turret.position.z = -50;
-    scene.add(turret);
+    let leftGun = new Gun();
+    leftGun.position.copy(camera.position).add(new THREE.Vector3(-6, 0, 0));
+    scene.add(leftGun);
 
-    let spotLight = new THREE.SpotLight("#aaaaaa");
-    spotLight.position.x = turret.bbox.getCenter().x;
-    spotLight.position.y = turret.bbox.max.y + 1000;
-    spotLight.position.z = turret.bbox.getCenter().z;
-    spotLight.decay = 0;
-    spotLight.angle = THREE.Math.degToRad(90);
-    spotLight.target = turret;
-    scene.add(spotLight);
+    let rightGun = new Gun();
+    rightGun.position.copy(camera.position).add(new THREE.Vector3(6, 0, 0));
+    scene.add(rightGun);
+
+    let leftGunLight = new THREE.SpotLight("#999999");
+    leftGunLight.position.copy(leftGun.position).add(new THREE.Vector3(400, 100, 0));
+    leftGunLight.target = leftGun;
+    scene.add(leftGunLight);
+
+    let rightGunLight = new THREE.SpotLight("#999999");
+    rightGunLight.position.copy(rightGun.position).add(new THREE.Vector3(-400, -100, 0));
+    rightGunLight.target = rightGun;
+    scene.add(rightGunLight);
 
     let ambientLight = new THREE.AmbientLight("#ffffff");
     scene.add(ambientLight);
@@ -77,19 +81,17 @@ function render() {
   let delta = clock.getDelta();
   let elapsedTime = clock.getElapsedTime();
   let reticule = scene.children.find(child => child instanceof Reticule);
-  let turret = scene.children.find(child => child instanceof Turret);
+  let [leftGun, rightGun] = scene.children.filter(child => child instanceof Gun);
   let enemies = scene.children.filter(child => child instanceof Enemy);
   let lasers = scene.children.filter(child => child instanceof Laser);
   let particles = scene.children.filter(child => child instanceof Particle);
-  let maxWorldDepth = turret.bbox.min.z - Laser.range;
+  let maxWorldDepth = camera.position.z - Laser.range;
 
   reticule.position.copy(mouse.getPosition(camera.position.z - 10));
   reticule.lookAt(camera.position);
-  reticule.line.geometry.vertices[0] = reticule.worldToLocal(turret.position.clone());
-  reticule.line.geometry.vertices[1] = reticule.worldToLocal(mouse.getPosition(maxWorldDepth));
-  reticule.line.geometry.verticesNeedUpdate = true;
 
-  turret.lookAt(mouse.getPosition(maxWorldDepth));
+  leftGun.lookAt(mouse.getPosition(maxWorldDepth));
+  rightGun.rotation.copy(leftGun.rotation);
 
   enemies.forEach(enemy => {
     if (enemy.getWorldPosition().z < camera.position.z) {
@@ -100,7 +102,7 @@ function render() {
   });
 
   lasers.forEach(laser => {
-    if (laser.getWorldPosition().z > turret.bbox.min.z - 2000) {
+    if (laser.getWorldPosition().z > maxWorldDepth) {
       laser.position.addScaledVector(laser.getWorldDirection(), laser.speed * delta);
     } else {
       scene.remove(laser);
@@ -116,39 +118,32 @@ function render() {
     }
   });
 
-  if (random(0, 100) < 12) {
+  if (!enemies.length || elapsedTime - enemies.pop().spawnedAt > 2) {
     let enemy = new Enemy();
     enemy.position.x = camera.position.x + random(-400, 400);
     enemy.position.y = camera.position.y + random(-100, 100);
     enemy.position.z = maxWorldDepth;
     enemy.lookAt(new THREE.Vector3(random(-400, 400), random(-100, 100), camera.position.z));
+    enemy.spawnedAt = elapsedTime;
     scene.add(enemy);
   }
 
   let particle = new Particle();
-  particle.position.x = camera.position.x + random(-100, 100);
+  particle.position.x = camera.position.x + random(-30, 30);
   particle.position.y = camera.position.y + random(-20, 20);
-  particle.position.z = turret.bbox.min.z - 10;
+  particle.position.z = camera.position.z - 50;
   scene.add(particle);
 
-  if ((keyboard.a || keyboard.left) && turret.position.x > -50) {
-    turret.position.x -= turret.speed * delta;
-  }
-
-  if ((keyboard.d || keyboard.right) && turret.position.x < 50) {
-    turret.position.x += turret.speed * delta;
-  }
-
-  if (keyboard.space && (!lasers.length || elapsedTime - lasers.pop().spawnedAt > 0.3)) {
+  if (keyboard.space && (!lasers.length || elapsedTime - lasers.pop().spawnedAt > 0.2)) {
     let laser1 = new Laser();
-    laser1.position.copy(turret.localToWorld(turret.leftGunPosition));
-    laser1.rotation.copy(turret.rotation);
+    laser1.position.copy(leftGun.localToWorld(leftGun.frontPosition.clone()));
+    laser1.lookAt(mouse.getPosition(maxWorldDepth));
     laser1.spawnedAt = elapsedTime;
     scene.add(laser1);
 
     let laser2 = new Laser();
-    laser2.position.copy(turret.localToWorld(turret.rightGunPosition));
-    laser2.rotation.copy(turret.rotation);
+    laser2.position.copy(rightGun.localToWorld(rightGun.frontPosition.clone()));
+    laser2.rotation.copy(laser1.rotation);
     laser2.spawnedAt = elapsedTime;
     scene.add(laser2);
 

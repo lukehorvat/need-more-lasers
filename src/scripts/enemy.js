@@ -8,7 +8,7 @@ export default class Enemy extends THREE.Group {
   constructor() {
     super();
 
-    this.speed = random(200, 400);
+    this.speed = random(50, 300);
     this.model = ModelCache.get(Enemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
