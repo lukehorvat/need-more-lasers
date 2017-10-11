@@ -10,10 +10,11 @@ import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
 import Turret from "./turret";
+import Enemy from "./enemy";
 import Laser from "./laser";
 import Particle from "./particle";
 
-let modelFilenames = [Turret.modelName, Reticule.modelName, Laser.modelName];
+let modelFilenames = [Reticule.modelName, Turret.modelName, Enemy.modelName, Laser.modelName];
 let modelCache = new ModelCache("models");
 let audioCtx;
 let renderer;
@@ -56,9 +57,6 @@ function init() {
 
     clock = new THREE.Clock();
 
-    let ambientLight = new THREE.AmbientLight("#ffffff");
-    scene.add(ambientLight);
-
     let reticule = new Reticule(modelCache);
     scene.add(reticule);
 
@@ -67,12 +65,17 @@ function init() {
     turret.position.z = -50;
     scene.add(turret);
 
-    let turretLight = new THREE.SpotLight("#aaaaaa");
-    turretLight.position.x = turret.bbox.getCenter().x;
-    turretLight.position.y = turret.bbox.max.y + 300;
-    turretLight.position.z = turret.bbox.getCenter().z;
-    turretLight.target = turret;
-    scene.add(turretLight);
+    let spotLight = new THREE.SpotLight("#aaaaaa");
+    spotLight.position.x = turret.bbox.getCenter().x;
+    spotLight.position.y = turret.bbox.max.y + 1000;
+    spotLight.position.z = turret.bbox.getCenter().z;
+    spotLight.decay = 0;
+    spotLight.angle = THREE.Math.degToRad(90);
+    spotLight.target = turret;
+    scene.add(spotLight);
+
+    let ambientLight = new THREE.AmbientLight("#ffffff");
+    scene.add(ambientLight);
   });
 }
 
@@ -80,26 +83,47 @@ function render() {
   let delta = clock.getDelta();
   let reticule = scene.children.find(child => child instanceof Reticule);
   let turret = scene.children.find(child => child instanceof Turret);
+  let enemies = scene.children.filter(child => child instanceof Enemy);
   let lasers = scene.children.filter(child => child instanceof Laser);
   let particles = scene.children.filter(child => child instanceof Particle);
 
-  reticule.position.copy(mouse.getPosition(turret.bbox.min.z - 5000));
+  reticule.position.copy(mouse.getPosition(turret.bbox.min.z - 1000));
   reticule.lookAt(turret.bbox.getCenter());
 
   turret.lookAt(reticule.position);
 
+  enemies.forEach(enemy => {
+    if (enemy.getWorldPosition().z < camera.position.z) {
+      enemy.position.z += enemy.speed * delta;
+    } else {
+      scene.remove(enemy);
+    }
+  });
+
   lasers.forEach(laser => {
-    laser.position.addScaledVector(laser.direction, laser.speed * delta);
+    if (laser.getWorldPosition().z > turret.bbox.min.z - 2000) {
+      laser.position.addScaledVector(laser.direction, laser.speed * delta);
+    } else {
+      scene.remove(laser);
+    }
   });
 
   particles.forEach(particle => {
     if (particle.getWorldPosition().z < camera.position.z) {
       particle.position.z += particle.speed * delta;
-      particle.rotation.x = THREE.Math.degToRad(10) * delta;
+      particle.rotation.z += THREE.Math.degToRad(360) * delta;
     } else {
       scene.remove(particle);
     }
   });
+
+  if (random(0, 100) < 8) {
+    let enemy = new Enemy(modelCache);
+    enemy.position.x = camera.position.x + random(-400, 400);
+    enemy.position.y = camera.position.y + random(-100, 100);
+    enemy.position.z = turret.bbox.min.z - 2000;
+    scene.add(enemy);
+  }
 
   let particle = new Particle();
   particle.position.x = camera.position.x + random(-100, 100);
@@ -115,7 +139,7 @@ function render() {
     turret.position.x += turret.speed * delta;
   }
 
-  if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 300)) {
+  if (keyboard.space && (!Laser.lastSpawnTime || moment().diff(Laser.lastSpawnTime, "milliseconds") > 250)) {
     let laser1 = new Laser(modelCache);
     laser1.position.copy(turret.localToWorld(turret.leftGunPosition));
     laser1.direction = reticule.bbox.getCenter().sub(laser1.position).normalize();

@@ -13,8 +13,8 @@ export default class Turret extends THREE.Group {
         switch (mesh.name) {
           case "body":
           case "pipe": return new THREE.MeshPhysicalMaterial({ color: "#444444", reflectivity: 0.5, metalness: 0.4, });
-          case "glass": return new THREE.MeshPhysicalMaterial({ color: "#ff6600", reflectivity: 0.9, metalness: 0.3, });
           case "metal": return new THREE.MeshPhysicalMaterial({ color: "#bbbbbb", reflectivity: 0.1, metalness: 0.7, });
+          case "glass": return new THREE.MeshPhysicalMaterial({ color: "#ff6600", reflectivity: 0.9, metalness: 0.3, });
         }
       })();
     });
