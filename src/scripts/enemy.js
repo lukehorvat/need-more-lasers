@@ -4,6 +4,7 @@ import ModelCache from "./model-cache";
 
 export default class Enemy extends THREE.Group {
   static modelName = "enemy.obj";
+  static explosionSoundName = "explosion.ogg";
 
   constructor() {
     super();

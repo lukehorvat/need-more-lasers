@@ -7,11 +7,10 @@
     "es6-map": "0.1.5",
     "lodash.random": "3.2.0",
     "promise-each": "2.2.0",
-    "soundbank-reverb": "1.1.2",
+    "soundmanager2": "2.97.20170602",
     "three": "0.86.0",
     "three-obj-loader": "1.1.3",
-    "three-window-resize": "1.0.4",
-    "web-audio-oscillators": "1.0.3"
+    "three-window-resize": "1.0.4"
   },
   "devDependencies": {
     "babel-preset-es2015": "6.24.1",

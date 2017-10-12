@@ -10,19 +10,19 @@ class ModelCache extends Map {
     return Promise.resolve(modelNames).then(each(modelName => this.set(modelName)));
   }
 
-  get(key) {
-    let value = super.get(key);
-    if (value) value = value.clone();
-    return value;
+  get(modelName) {
+    let model = super.get(modelName);
+    if (model) model = model.clone();
+    return model;
   }
 
-  set(key, value) {
-    if (value !== undefined) return super.set(key, value);
+  set(modelName, model) {
+    if (model) return super.set(modelName, model);
 
     return new Promise(resolve => {
       let loader = new THREE.OBJLoader();
-      loader.load(`models/${key}`, model => {
-        this.set(key, model);
+      loader.load(`models/${modelName}`, model => {
+        this.set(modelName, model);
         resolve();
       });
     });

@@ -7,7 +7,6 @@ export default class Gun extends THREE.Group {
   constructor() {
     super();
 
-    this.speed = 60;
     this.model = ModelCache.get(Gun.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {

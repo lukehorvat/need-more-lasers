@@ -3,7 +3,7 @@ import WindowResize from "three-window-resize";
 import random from "lodash.random";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
-import * as sounds from "./sounds";
+import SoundCache from "./sound-cache";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
@@ -12,7 +12,6 @@ import Enemy from "./enemy";
 import Laser from "./laser";
 import Particle from "./particle";
 
-let audioCtx;
 let renderer;
 let camera;
 let mouse;
@@ -23,15 +22,22 @@ let clock;
 init().then(render);
 
 function init() {
-  return ModelCache.init([
-    Reticule.modelName,
-    Gun.modelName,
-    Enemy.modelName,
-    Laser.modelName
-  ]).then(() => {
+  return Promise
+  .resolve()
+  .then(() => (
+    ModelCache.init([
+      Reticule.modelName,
+      Gun.modelName,
+      Enemy.modelName,
+      Laser.modelName,
+    ])
+  )).then(() => (
+    SoundCache.init([
+      Enemy.explosionSoundName,
+      Laser.fireSoundName,
+    ])
+  )).then(() => {
     ThreeExtensions.install();
-
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
     renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -42,8 +48,6 @@ function init() {
     WindowResize(renderer, camera); // Automatically handle window resize events.
 
     mouse = new Mouse(renderer, camera);
-    mouse.x = 0;
-    mouse.y = -0.1;
 
     keyboard = new Keyboard();
 
@@ -108,7 +112,7 @@ function render() {
       let enemy = enemies.find(enemy => enemy.bbox.containsPoint(laser.localToWorld(laser.frontPosition.clone())));
       if (enemy) {
         scene.remove(laser, enemy);
-        sounds.explosion(audioCtx);
+        SoundCache.get(Enemy.explosionSoundName).play({ volume: 20 });
       }
     } else {
       scene.remove(laser);
@@ -151,7 +155,7 @@ function render() {
 
     laser1.spawnedAt = laser2.spawnedAt = elapsedTime;
     scene.add(laser1, laser2);
-    sounds.laser(audioCtx);
+    SoundCache.get(Laser.fireSoundName).play({ volume: 100 });
   }
 
   // Render the scene!
