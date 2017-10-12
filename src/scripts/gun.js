@@ -19,7 +19,7 @@ export default class Gun extends THREE.Group {
     });
     this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.5;
 
-     // Model isn't centered; correct it.
+    // Center the model in case it isn't already.
     this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);
 
     // Move the model forwards so that the back of it is at (0,0,0).

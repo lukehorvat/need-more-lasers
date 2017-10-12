@@ -104,6 +104,12 @@ function render() {
   lasers.forEach(laser => {
     if (laser.getWorldPosition().z > maxWorldDepth) {
       laser.position.addScaledVector(laser.getWorldDirection(), laser.speed * delta);
+
+      let enemy = enemies.find(enemy => enemy.bbox.containsPoint(laser.localToWorld(laser.frontPosition.clone())));
+      if (enemy) {
+        scene.remove(laser, enemy);
+        sounds.explosion(audioCtx);
+      }
     } else {
       scene.remove(laser);
     }
@@ -118,7 +124,7 @@ function render() {
     }
   });
 
-  if (!enemies.length || elapsedTime - enemies.pop().spawnedAt > 2) {
+  if (!enemies.length || elapsedTime - enemies.pop().spawnedAt > 1) {
     let enemy = new Enemy();
     enemy.position.x = camera.position.x + random(-400, 400);
     enemy.position.y = camera.position.y + random(-100, 100);
@@ -138,15 +144,13 @@ function render() {
     let laser1 = new Laser();
     laser1.position.copy(leftGun.localToWorld(leftGun.frontPosition.clone()));
     laser1.lookAt(mouse.getPosition(maxWorldDepth));
-    laser1.spawnedAt = elapsedTime;
-    scene.add(laser1);
 
     let laser2 = new Laser();
     laser2.position.copy(rightGun.localToWorld(rightGun.frontPosition.clone()));
     laser2.rotation.copy(laser1.rotation);
-    laser2.spawnedAt = elapsedTime;
-    scene.add(laser2);
 
+    laser1.spawnedAt = laser2.spawnedAt = elapsedTime;
+    scene.add(laser1, laser2);
     sounds.laser(audioCtx);
   }
 

@@ -21,6 +21,10 @@ export default class Enemy extends THREE.Group {
     });
     this.model.rotation.y = THREE.Math.degToRad(180); // Model faces the wrong way; correct it.
     this.model.scale.x = this.model.scale.y = this.model.scale.z = 2;
+
+    // Center the model in case it isn't already.
+    this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);
+
     this.add(this.model);
   }
 }

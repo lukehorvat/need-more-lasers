@@ -12,7 +12,10 @@ export default class Reticule extends THREE.Group {
       mesh.material = new THREE.MeshToonMaterial({ color: "#00ff00", transparent: true, opacity: 0.5, });
     });
     this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.7;
-    this.model.bbox.getCenter(this.model.position).multiplyScalar(-1); // Model isn't centered; correct it.
+
+    // Center the model in case it isn't already.
+    this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);
+
     this.add(this.model);
   }
 }
