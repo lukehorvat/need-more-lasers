@@ -94,6 +94,7 @@ export default class Game {
   }
 
   start() {
+    this.domElement.style.cursor = "none";
     this.update();
   }
 
