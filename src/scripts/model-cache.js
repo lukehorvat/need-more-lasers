@@ -5,7 +5,13 @@ import each from "promise-each";
 
 OBJLoader(THREE);
 
-class ModelCache extends Map {
+export default class ModelCache extends Map {
+  constructor(path = "") {
+    super();
+
+    this.path = path;
+  }
+
   init(modelNames) {
     return Promise.resolve(modelNames).then(each(modelName => this.set(modelName)));
   }
@@ -21,12 +27,10 @@ class ModelCache extends Map {
 
     return new Promise(resolve => {
       let loader = new THREE.OBJLoader();
-      loader.load(`models/${modelName}`, model => {
+      loader.load(`${this.path}/${modelName}`, model => {
         this.set(modelName, model);
         resolve();
       });
     });
   }
 }
-
-export default new ModelCache();

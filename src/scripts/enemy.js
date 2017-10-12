@@ -1,16 +1,15 @@
 import * as THREE from "three";
 import random from "lodash.random";
-import ModelCache from "./model-cache";
 
 export default class Enemy extends THREE.Group {
   static modelName = "enemy.obj";
   static explosionSoundName = "explosion.ogg";
 
-  constructor() {
+  constructor(game) {
     super();
 
     this.speed = random(50, 300);
-    this.model = ModelCache.get(Enemy.modelName);
+    this.model = game.models.get(Enemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
         switch (mesh.name) {

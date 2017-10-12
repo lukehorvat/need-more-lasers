@@ -1,16 +1,15 @@
 import * as THREE from "three";
-import ModelCache from "./model-cache";
 
 export default class Laser extends THREE.Group {
   static modelName = "laser.obj";
   static fireSoundName = "laser.ogg";
   static range = 2000;
 
-  constructor() {
+  constructor(game) {
     super();
 
     this.speed = 500;
-    this.model = ModelCache.get(Laser.modelName);
+    this.model = game.models.get(Laser.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = new THREE.MeshPhysicalMaterial({ color: "#ff2121", reflectivity: 1, metalness: 0, });
     });

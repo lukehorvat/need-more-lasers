@@ -2,7 +2,13 @@ import Map from "es6-map/polyfill"; // Chrome has problems with extending Map. :
 import { soundManager } from "soundmanager2";
 import each from "promise-each";
 
-class SoundCache extends Map {
+export default class SoundCache extends Map {
+  constructor(path = "") {
+    super();
+
+    this.path = path;
+  }
+
   init(soundNames) {
     return Promise.resolve(soundNames).then(each(soundName => this.set(soundName)));
   }
@@ -17,7 +23,7 @@ class SoundCache extends Map {
       new Promise(resolve => {
         let sound = soundManager.createSound({
           id: `sound#${soundName}`,
-          url: `sounds/${soundName}`,
+          url: `${this.path}/${soundName}`,
           autoLoad: true,
           onload: resolve
         });
@@ -26,5 +32,3 @@ class SoundCache extends Map {
     ));
   }
 }
-
-export default new SoundCache();

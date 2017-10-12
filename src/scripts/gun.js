@@ -1,13 +1,12 @@
 import * as THREE from "three";
-import ModelCache from "./model-cache";
 
 export default class Gun extends THREE.Group {
   static modelName = "gun.obj";
 
-  constructor() {
+  constructor(game) {
     super();
 
-    this.model = ModelCache.get(Gun.modelName);
+    this.model = game.models.get(Gun.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {
         switch (mesh.name) {
