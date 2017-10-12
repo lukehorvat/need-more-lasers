@@ -28,6 +28,7 @@ export default class Game {
         Gun.modelName,
         Enemy.modelName,
         Laser.modelName,
+        Particle.modelName,
       ])
     )).then(() => (
       this.sounds.init([
