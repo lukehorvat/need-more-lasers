@@ -11,6 +11,7 @@ import Reticule from "./reticule";
 import KillCounter from "./kill-counter";
 import Gun from "./gun";
 import Enemy from "./enemy";
+import Enemy2 from "./enemy2";
 import Laser from "./laser";
 import Particle from "./particle";
 
@@ -30,6 +31,7 @@ export default class Game {
         Reticule.modelName,
         Gun.modelName,
         Enemy.modelName,
+        Enemy2.modelName,
         Laser.modelName,
         Particle.modelName,
       ])
@@ -139,11 +141,11 @@ export default class Game {
     });
 
     if (!this.enemies.length || elapsedTime - this.enemies.pop().spawnedAt > 1) {
-      let enemy = new Enemy(this);
-      enemy.position.x = this.camera.position.x + random(-400, 400);
-      enemy.position.y = this.camera.position.y + random(-100, 100);
+      let enemy = random(0, 100) < 20 ? new Enemy2(this) : new Enemy(this);
+      enemy.position.x = this.camera.position.x + random(-500, 500);
+      enemy.position.y = this.camera.position.y + random(-200, 200);
       enemy.position.z = maxWorldDepth;
-      enemy.lookAt(new THREE.Vector3(random(-400, 400), random(-100, 100), this.camera.position.z));
+      enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
       enemy.spawnedAt = elapsedTime;
       this.scene.add(enemy);
     }
@@ -180,7 +182,7 @@ export default class Game {
   }
 
   get enemies() {
-    return this.scene.children.filter(child => child instanceof Enemy);
+    return this.scene.children.filter(child => child instanceof Enemy || child instanceof Enemy2);
   }
 
   get particles() {

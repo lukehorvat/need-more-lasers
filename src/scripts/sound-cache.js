@@ -10,7 +10,7 @@ export default class SoundCache extends Map {
   }
 
   init(soundNames) {
-    return Promise.resolve(soundNames).then(each(soundName => this.set(soundName)));
+    return Promise.resolve(Array.from(new Set(soundNames))).then(each(soundName => this.set(soundName)));
   }
 
   set(soundName, sound) {

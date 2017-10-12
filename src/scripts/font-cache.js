@@ -10,7 +10,7 @@ export default class FontCache extends Map {
   }
 
   init(fontNames) {
-    return Promise.resolve(fontNames).then(each(fontName => this.set(fontName)));
+    return Promise.resolve(Array.from(new Set(fontNames))).then(each(fontName => this.set(fontName)));
   }
 
   set(fontName, font) {

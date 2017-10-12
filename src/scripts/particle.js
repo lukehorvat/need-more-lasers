@@ -11,7 +11,7 @@ export default class Particle extends THREE.Group {
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = new THREE.MeshToonMaterial({ color: "#444444" });
     });
-    this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.15;
+    this.model.scale.x = this.model.scale.y = this.model.scale.z = 0.1;
     this.add(this.model);
   }
 }

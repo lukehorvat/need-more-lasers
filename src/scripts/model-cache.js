@@ -13,7 +13,7 @@ export default class ModelCache extends Map {
   }
 
   init(modelNames) {
-    return Promise.resolve(modelNames).then(each(modelName => this.set(modelName)));
+    return Promise.resolve(Array.from(new Set(modelNames))).then(each(modelName => this.set(modelName)));
   }
 
   get(modelName) {
