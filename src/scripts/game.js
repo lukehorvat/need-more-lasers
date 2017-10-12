@@ -4,19 +4,22 @@ import random from "lodash.random";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
 import SoundCache from "./sound-cache";
+import FontCache from "./font-cache";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
+import KillCounter from "./kill-counter";
 import Gun from "./gun";
 import Enemy from "./enemy";
 import Laser from "./laser";
 import Particle from "./particle";
 
 export default class Game {
-  constructor(domElement, modelsPath, soundsPath) {
+  constructor(domElement, modelsPath, soundsPath, fontsPath) {
     this.domElement = domElement;
     this.models = new ModelCache(modelsPath);
     this.sounds = new SoundCache(soundsPath);
+    this.fonts = new FontCache(fontsPath);
   }
 
   init() {
@@ -34,6 +37,10 @@ export default class Game {
       this.sounds.init([
         Enemy.explosionSoundName,
         Laser.fireSoundName,
+      ])
+    )).then(() => (
+      this.fonts.init([
+        KillCounter.fontName,
       ])
     )).then(() => {
       ThreeExtensions.install();
@@ -56,6 +63,10 @@ export default class Game {
 
       this.reticule = new Reticule(this);
       this.scene.add(this.reticule);
+
+      this.killCounter = new KillCounter(this);
+      this.killCounter.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: compute position from visible rectangle at this depth.
+      this.scene.add(this.killCounter);
 
       this.leftGun = new Gun(this);
       this.leftGun.position.copy(this.camera.position).add(new THREE.Vector3(-6, 0, 0));
@@ -110,6 +121,7 @@ export default class Game {
         let enemy = this.enemies.find(enemy => enemy.bbox.containsPoint(laser.localToWorld(laser.frontPosition.clone())));
         if (enemy) {
           this.scene.remove(laser, enemy);
+          this.killCounter.increment();
           this.sounds.get(Enemy.explosionSoundName).play({ volume: 20 });
         }
       } else {

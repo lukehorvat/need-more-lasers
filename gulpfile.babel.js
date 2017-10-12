@@ -85,8 +85,8 @@ gulp.task("build-styles", () => {
 gulp.task("build-misc", () => {
   let imagesFilter = filter("**/*.{ico,gif,jpg,png}", { restore: true });
   let soundsFilter = filter("**/*.{mp3,ogg}", { restore: true });
-  let fontsFilter = filter("**/*.{otf,eot,svg,ttf,woff,woff2}", { restore: true });
   let modelsFilter = filter("**/*.obj", { restore: true });
+  let fontsFilter = filter("**/*.json", { restore: true });
 
   return gulp
     .src(config.misc)
@@ -96,12 +96,12 @@ gulp.task("build-misc", () => {
     .pipe(soundsFilter)
     .pipe(gulp.dest(`${config.buildDir}/sounds`))
     .pipe(soundsFilter.restore)
-    .pipe(fontsFilter)
-    .pipe(gulp.dest(`${config.buildDir}/fonts`))
-    .pipe(fontsFilter.restore)
     .pipe(modelsFilter)
     .pipe(gulp.dest(`${config.buildDir}/models`))
-    .pipe(modelsFilter.restore);
+    .pipe(modelsFilter.restore)
+    .pipe(fontsFilter)
+    .pipe(gulp.dest(`${config.buildDir}/fonts`))
+    .pipe(fontsFilter.restore);
 });
 
 gulp.task("build-index", () => {
