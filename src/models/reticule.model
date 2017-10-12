@@ -1,0 +1,15 @@
+# Made using Asset Forge (1.2.1)
+
+:models
+Primitives/block_piramid[(-5.22E-08, 1.8, 3.35E-08);(0.0, 180.0, 0.0);(0.2, 0.3, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+Primitives/block_piramid[(-2.98E-08, 0.2, 0);(0.0, 180.0, 180.0);(0.2, 0.3, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+Primitives/block_piramid[(0.85, 1, 0);(0.0, 0.0, 270.0);(0.2, 0.3, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+Primitives/block_piramid[(-0.8, 1, 7.45E-09);(0.0, 0.0, 90.0);(0.2, 0.3, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+Primitives/sphere_full[(2.61E-08, 0.9, 3.73E-09);(0.0, 0.0, 0.0);(0.2, 0.2, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+
+:materials
+_defaultMat[RGBA(1.000, 1.000, 1.000, 1.000);]
+
+:textures
+
+:extra
