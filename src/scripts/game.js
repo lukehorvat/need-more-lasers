@@ -19,6 +19,16 @@ import Particle from "./particle";
 
 export default class Game {
   static startSoundName = "start.ogg";
+  static complimentSoundNames = [
+    "congratulations.ogg",
+    "eliminated.ogg",
+    "fantastic.ogg",
+    "flawless.ogg",
+    "perfect.ogg",
+    "target-destroyed.ogg",
+    "target-eliminated.ogg",
+    "well-done.ogg",
+  ];
 
   constructor(domElement, modelsPath, soundsPath, fontsPath) {
     this.domElement = domElement;
@@ -42,6 +52,7 @@ export default class Game {
     )).then(() => (
       this.sounds.init([
         Game.startSoundName,
+        ...Game.complimentSoundNames,
         Laser.fireSoundName,
         Explosion.soundName,
       ])

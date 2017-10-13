@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import random from "lodash.random";
+import Game from "./game";
 import GameObject from "./game-object";
 import Enemy from "./enemy";
 import Explosion from "./explosion";
@@ -37,6 +38,7 @@ export default class Laser extends GameObject {
     if (this.getWorldPosition().z > this.game.camera.position.z - this.game.camera.far) {
       this.position.addScaledVector(this.getWorldDirection(), this.speed * delta);
 
+      // Did the laser hit an enemy?
       let enemy = this.game.enemies.find(enemy => enemy.bbox.containsPoint(this.localToWorld(this.frontPosition.clone())));
       if (enemy) {
         this.game.scene.remove(this, enemy);
@@ -46,6 +48,11 @@ export default class Laser extends GameObject {
         let explosion = new Explosion(this.game, elapsedTime);
         explosion.position.copy(enemy.getWorldPosition());
         this.game.scene.add(explosion);
+
+        if (random(0, 100) < 25) {
+          let compliment = Game.complimentSoundNames[random(0, Game.complimentSoundNames.length - 1)];
+          setTimeout(() => this.game.sounds.get(compliment).play({ volume: 80 }), 1000);
+        }
       }
     } else {
       this.game.scene.remove(this);
