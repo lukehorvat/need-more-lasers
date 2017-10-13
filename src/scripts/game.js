@@ -17,6 +17,8 @@ import FastEnemy from "./fast-enemy";
 import Particle from "./particle";
 
 export default class Game {
+  static startSoundName = "start.ogg";
+
   constructor(domElement, modelsPath, soundsPath, fontsPath) {
     this.domElement = domElement;
     this.models = new ModelCache(modelsPath);
@@ -37,6 +39,7 @@ export default class Game {
       ])
     )).then(() => (
       this.sounds.init([
+        Game.startSoundName,
         Laser.fireSoundName,
         Enemy.explosionSoundName,
       ])
@@ -91,6 +94,8 @@ export default class Game {
     this.light3.position.copy(this.player.position).add(new THREE.Vector3(-800, -500, 1000));
     this.light3.angle = THREE.Math.degToRad(90);
     this.scene.add(this.light3);
+
+    this.sounds.get(Game.startSoundName).play({ volume: 100 });
 
     this.update();
   }
