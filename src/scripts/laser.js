@@ -1,6 +1,8 @@
 import * as THREE from "three";
+import random from "lodash.random";
 import GameObject from "./game-object";
 import Enemy from "./enemy";
+import Explosion from "./explosion";
 
 export default class Laser extends GameObject {
   static modelName = "laser.obj";
@@ -39,7 +41,11 @@ export default class Laser extends GameObject {
       if (enemy) {
         this.game.scene.remove(this, enemy);
         this.game.killCounter.increment();
-        this.game.sounds.get(Enemy.explosionSoundName).play({ volume: 20 });
+        this.game.sounds.get(Explosion.soundName).play({ volume: random(20, 40) });
+
+        let explosion = new Explosion(this.game, elapsedTime);
+        explosion.position.copy(enemy.getWorldPosition());
+        this.game.scene.add(explosion);
       }
     } else {
       this.game.scene.remove(this);

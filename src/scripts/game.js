@@ -14,6 +14,7 @@ import Laser from "./laser";
 import Enemy from "./enemy";
 import SlowEnemy from "./slow-enemy";
 import FastEnemy from "./fast-enemy";
+import Explosion from "./explosion";
 import Particle from "./particle";
 
 export default class Game {
@@ -35,13 +36,14 @@ export default class Game {
         Laser.modelName,
         SlowEnemy.modelName,
         FastEnemy.modelName,
+        Explosion.modelName,
         Particle.modelName,
       ])
     )).then(() => (
       this.sounds.init([
         Game.startSoundName,
         Laser.fireSoundName,
-        Enemy.explosionSoundName,
+        Explosion.soundName,
       ])
     )).then(() => (
       this.fonts.init([
@@ -95,7 +97,7 @@ export default class Game {
     this.light3.angle = THREE.Math.degToRad(90);
     this.scene.add(this.light3);
 
-    this.sounds.get(Game.startSoundName).play({ volume: 100 });
+    this.sounds.get(Game.startSoundName).play({ volume: 80 });
 
     this.update();
   }
@@ -103,7 +105,7 @@ export default class Game {
   update() {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
-    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.particles];
+    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.explosions, ...this.particles];
 
     objects.forEach(object => object.update(elapsedTime, delta));
 
@@ -133,6 +135,10 @@ export default class Game {
 
   get enemies() {
     return this.scene.children.filter(child => child instanceof Enemy);
+  }
+
+  get explosions() {
+    return this.scene.children.filter(child => child instanceof Explosion);
   }
 
   get particles() {
