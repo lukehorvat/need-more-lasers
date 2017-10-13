@@ -10,7 +10,6 @@ import Keyboard from "./keyboard";
 import Reticule from "./reticule";
 import KillCounter from "./kill-counter";
 import Player from "./player";
-import Gun from "./gun";
 import Laser from "./laser";
 import Enemy from "./enemy";
 import SlowEnemy from "./slow-enemy";
@@ -31,7 +30,6 @@ export default class Game {
     .then(() => (
       this.models.init([
         Reticule.modelName,
-        Gun.modelName,
         Laser.modelName,
         SlowEnemy.modelName,
         FastEnemy.modelName,
@@ -58,7 +56,7 @@ export default class Game {
     this.domElement.style.cursor = "none";
     this.domElement.appendChild(this.renderer.domElement);
 
-    this.camera = new THREE.PerspectiveCamera(80, this.renderer.domElement.clientWidth / this.renderer.domElement.clientHeight, 1, Number.MAX_SAFE_INTEGER);
+    this.camera = new THREE.PerspectiveCamera(80, this.renderer.domElement.clientWidth / this.renderer.domElement.clientHeight, 1, 2000);
 
     WindowResize(this.renderer, this.camera); // Automatically handle window resize events.
 
@@ -81,18 +79,18 @@ export default class Game {
     this.player.position.copy(this.camera.position);
     this.scene.add(this.player);
 
-    this.leftGunLight = new THREE.SpotLight("#999999");
-    this.leftGunLight.position.copy(this.player.leftGun.getWorldPosition()).add(new THREE.Vector3(400, 100, 0));
-    this.leftGunLight.target = this.player.leftGun;
-    this.scene.add(this.leftGunLight);
+    this.light1 = new THREE.AmbientLight("#ffffff");
+    this.scene.add(this.light1);
 
-    this.rightGunLight = new THREE.SpotLight("#999999");
-    this.rightGunLight.position.copy(this.player.rightGun.getWorldPosition()).add(new THREE.Vector3(-400, -100, 0));
-    this.rightGunLight.target = this.player.rightGun;
-    this.scene.add(this.rightGunLight);
+    this.light2 = new THREE.SpotLight("#999999");
+    this.light2.position.copy(this.player.position).add(new THREE.Vector3(800, 500, 1000));
+    this.light2.angle = THREE.Math.degToRad(90);
+    this.scene.add(this.light2);
 
-    this.ambientLight = new THREE.AmbientLight("#ffffff");
-    this.scene.add(this.ambientLight);
+    this.light3 = new THREE.SpotLight("#999999");
+    this.light3.position.copy(this.player.position).add(new THREE.Vector3(-800, -500, 1000));
+    this.light3.angle = THREE.Math.degToRad(90);
+    this.scene.add(this.light3);
 
     this.update();
   }
@@ -106,7 +104,7 @@ export default class Game {
 
     if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
       let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
-      enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.maxWorldDepth));
+      enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
       enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
       this.scene.add(enemy);
     }
@@ -134,9 +132,5 @@ export default class Game {
 
   get particles() {
     return this.scene.children.filter(child => child instanceof Particle);
-  }
-
-  get maxWorldDepth() {
-    return this.camera.position.z - Laser.range;
   }
 }

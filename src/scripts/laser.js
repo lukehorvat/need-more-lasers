@@ -5,12 +5,11 @@ import Enemy from "./enemy";
 export default class Laser extends GameObject {
   static modelName = "laser.obj";
   static fireSoundName = "laser.ogg";
-  static range = 2000;
 
   constructor(game, elapsedTime) {
     super(game, elapsedTime);
 
-    this.speed = 500;
+    this.speed = 400;
     this.model = game.models.get(Laser.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = new THREE.MeshPhysicalMaterial({ color: "#ff2121", reflectivity: 1, metalness: 0, });
@@ -33,7 +32,7 @@ export default class Laser extends GameObject {
   update(elapsedTime, delta) {
     super.update(elapsedTime, delta);
 
-    if (this.getWorldPosition().z > this.game.maxWorldDepth) {
+    if (this.getWorldPosition().z > this.game.camera.position.z - this.game.camera.far) {
       this.position.addScaledVector(this.getWorldDirection(), this.speed * delta);
 
       let enemy = this.game.enemies.find(enemy => enemy.bbox.containsPoint(this.localToWorld(this.frontPosition.clone())));
