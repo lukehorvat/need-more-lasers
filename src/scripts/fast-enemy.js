@@ -5,8 +5,8 @@ import Enemy from "./enemy";
 export default class FastEnemy extends Enemy {
   static modelName = "fast-enemy.obj";
 
-  constructor(game) {
-    super(game);
+  constructor(game, elapsedTime) {
+    super(game, elapsedTime);
 
     this.speed = random(100, 250);
     this.model = game.models.get(FastEnemy.modelName);

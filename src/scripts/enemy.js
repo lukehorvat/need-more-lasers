@@ -5,12 +5,6 @@ import GameObject from "./game-object";
 export default class Enemy extends GameObject {
   static explosionSoundName = "explosion.ogg";
 
-  spawn(elapsedTime) {
-    super.spawn(elapsedTime);
-
-    this.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.game.camera.position.z));
-  }
-
   update(elapsedTime, delta) {
     super.update(elapsedTime, delta);
 

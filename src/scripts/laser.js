@@ -7,8 +7,8 @@ export default class Laser extends GameObject {
   static fireSoundName = "laser.ogg";
   static range = 2000;
 
-  constructor(game) {
-    super(game);
+  constructor(game, elapsedTime) {
+    super(game, elapsedTime);
 
     this.speed = 500;
     this.model = game.models.get(Laser.modelName);
@@ -28,12 +28,6 @@ export default class Laser extends GameObject {
     this.frontPosition = new THREE.Vector3(0, 0, this.worldToLocal(this.model.bbox.max).z);
 
     this.add(this.model);
-  }
-
-  spawn(elapsedTime) {
-    super.spawn(elapsedTime);
-
-    this.lookAt(this.game.mouse.getPosition(this.game.maxWorldDepth));
   }
 
   update(elapsedTime, delta) {

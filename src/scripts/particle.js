@@ -5,8 +5,8 @@ import GameObject from "./game-object";
 export default class Particle extends GameObject {
   static modelName = "particle.obj";
 
-  constructor(game) {
-    super(game);
+  constructor(game, elapsedTime) {
+    super(game, elapsedTime);
 
     this.speed = 50;
     this.model = game.models.get(Particle.modelName);

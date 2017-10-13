@@ -9,6 +9,7 @@ import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
 import KillCounter from "./kill-counter";
+import Player from "./player";
 import Gun from "./gun";
 import Laser from "./laser";
 import Enemy from "./enemy";
@@ -70,28 +71,24 @@ export default class Game {
     this.clock = new THREE.Clock();
 
     this.reticule = new Reticule(this);
-    this.reticule.spawn();
+    this.scene.add(this.reticule);
 
     this.killCounter = new KillCounter(this);
-    this.killCounter.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3));
-    this.killCounter.spawn(); // TODO: compute position from visible rectangle at this depth.
+    this.killCounter.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: Compute position from visible rectangle at this depth.
+    this.scene.add(this.killCounter);
 
-    this.leftGun = new Gun(this);
-    this.leftGun.position.copy(this.camera.position).add(new THREE.Vector3(-6, 0, 0));
-    this.leftGun.spawn();
-
-    this.rightGun = new Gun(this);
-    this.rightGun.position.copy(this.camera.position).add(new THREE.Vector3(6, 0, 0));
-    this.rightGun.spawn();
+    this.player = new Player(this);
+    this.player.position.copy(this.camera.position);
+    this.scene.add(this.player);
 
     this.leftGunLight = new THREE.SpotLight("#999999");
-    this.leftGunLight.position.copy(this.leftGun.position).add(new THREE.Vector3(400, 100, 0));
-    this.leftGunLight.target = this.leftGun;
+    this.leftGunLight.position.copy(this.player.leftGun.getWorldPosition()).add(new THREE.Vector3(400, 100, 0));
+    this.leftGunLight.target = this.player.leftGun;
     this.scene.add(this.leftGunLight);
 
     this.rightGunLight = new THREE.SpotLight("#999999");
-    this.rightGunLight.position.copy(this.rightGun.position).add(new THREE.Vector3(-400, -100, 0));
-    this.rightGunLight.target = this.rightGun;
+    this.rightGunLight.position.copy(this.player.rightGun.getWorldPosition()).add(new THREE.Vector3(-400, -100, 0));
+    this.rightGunLight.target = this.player.rightGun;
     this.scene.add(this.rightGunLight);
 
     this.ambientLight = new THREE.AmbientLight("#ffffff");
@@ -103,32 +100,21 @@ export default class Game {
   update() {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
-    let objects = [this.reticule, this.leftGun, this.rightGun, ...this.lasers, ...this.enemies, ...this.particles];
+    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.particles];
 
     objects.forEach(object => object.update(elapsedTime, delta));
 
-    if (this.keyboard.space && (!this.lasers.length || elapsedTime - this.lasers.pop().spawnedAt > 0.2)) {
-      let laser1 = new Laser(this);
-      laser1.position.copy(this.leftGun.localToWorld(this.leftGun.frontPosition.clone()));
-      laser1.spawn(elapsedTime);
-
-      let laser2 = new Laser(this);
-      laser2.position.copy(this.rightGun.localToWorld(this.rightGun.frontPosition.clone()));
-      laser2.spawn(elapsedTime);
-
-      this.sounds.get(Laser.fireSoundName).play({ volume: 100 });
-    }
-
-    if (!this.enemies.length || elapsedTime - this.enemies.pop().spawnedAt > 1) {
-      let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this);
+    if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
+      let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
       enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.maxWorldDepth));
-      enemy.spawn(elapsedTime);
+      enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
+      this.scene.add(enemy);
     }
 
-    if (!this.particles.length || elapsedTime - this.particles.pop().spawnedAt > 0.01) {
-      let particle = new Particle(this);
+    if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
+      let particle = new Particle(this, elapsedTime);
       particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
-      particle.spawn(elapsedTime);
+      this.scene.add(particle);
     }
 
     // Render the scene!

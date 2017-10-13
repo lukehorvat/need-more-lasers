@@ -4,8 +4,8 @@ import GameObject from "./game-object";
 export default class KillCounter extends GameObject {
   static fontName = "passion-one.json";
 
-  constructor(game) {
-    super(game);
+  constructor(game, elapsedTime) {
+    super(game, elapsedTime);
 
     this.count = -1;
 

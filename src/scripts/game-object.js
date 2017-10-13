@@ -1,15 +1,11 @@
 import * as THREE from "three";
 
 export default class GameObject extends THREE.Group {
-  constructor(game) {
+  constructor(game, elapsedTime = 0) {
     super();
 
     this.game = game;
-  }
-
-  spawn(elapsedTime = 0) {
-    this.spawnedAt = elapsedTime;
-    this.game.scene.add(this);
+    this.createdAt = elapsedTime;
   }
 
   update(elapsedTime, delta) {

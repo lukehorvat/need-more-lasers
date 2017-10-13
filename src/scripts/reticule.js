@@ -4,8 +4,8 @@ import GameObject from "./game-object";
 export default class Reticule extends GameObject {
   static modelName = "reticule.obj";
 
-  constructor(game) {
-    super(game);
+  constructor(game, elapsedTime) {
+    super(game, elapsedTime);
 
     this.model = game.models.get(Reticule.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
