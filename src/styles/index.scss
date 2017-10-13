@@ -49,12 +49,7 @@ body, .game {
     cursor: pointer;
 
     &:hover {
-      animation: fade 600ms ease-in-out infinite alternate;
-
-      @keyframes fade {
-        0% { opacity: 1; }
-        100% { opacity: 0; }
-      }
+      background: fade-out($color, 0.75);
     }
 
     &:focus {

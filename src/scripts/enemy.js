@@ -1,30 +1,23 @@
 import * as THREE from "three";
 import random from "lodash.random";
+import GameObject from "./game-object";
 
-export default class Enemy extends THREE.Group {
-  static modelName = "enemy.obj";
+export default class Enemy extends GameObject {
   static explosionSoundName = "explosion.ogg";
 
-  constructor(game) {
-    super();
+  spawn(elapsedTime) {
+    super.spawn(elapsedTime);
 
-    this.speed = random(50, 250);
-    this.model = game.models.get(Enemy.modelName);
-    this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
-      mesh.material = (() => {
-        switch (mesh.name) {
-          case "body": return new THREE.MeshPhysicalMaterial({ color: "#202757", reflectivity: 0.8, metalness: 0.4, });
-          case "metal": return new THREE.MeshPhysicalMaterial({ color: "#4E2F63", reflectivity: 0.1, metalness: 0.7, });
-          case "glass": return new THREE.MeshPhysicalMaterial({ color: "#2F3563", reflectivity: 0.9, metalness: 0.3, });
-        }
-      })();
-    });
-    this.model.rotation.y = THREE.Math.degToRad(180); // Model faces the wrong way; correct it.
-    this.model.scale.x = this.model.scale.y = this.model.scale.z = random(1, 2);
+    this.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.game.camera.position.z));
+  }
 
-    // Center the model in case it isn't already.
-    this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);
+  update(elapsedTime, delta) {
+    super.update(elapsedTime, delta);
 
-    this.add(this.model);
+    if (this.getWorldPosition().z < this.game.camera.position.z) {
+      this.position.addScaledVector(this.getWorldDirection(), this.speed * delta);
+    } else {
+      this.game.scene.remove(this);
+    }
   }
 }

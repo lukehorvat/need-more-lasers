@@ -1,10 +1,11 @@
 import * as THREE from "three";
+import GameObject from "./game-object";
 
-export default class Reticule extends THREE.Group {
+export default class Reticule extends GameObject {
   static modelName = "reticule.obj";
 
   constructor(game) {
-    super();
+    super(game);
 
     this.model = game.models.get(Reticule.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
@@ -16,5 +17,12 @@ export default class Reticule extends THREE.Group {
     this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);
 
     this.add(this.model);
+  }
+
+  update(elapsedTime, delta) {
+    super.update(elapsedTime, delta);
+
+    this.position.copy(this.game.mouse.getPosition(this.game.camera.position.z - 10));
+    this.lookAt(this.game.camera.position);
   }
 }

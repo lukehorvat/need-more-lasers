@@ -1,10 +1,11 @@
 import * as THREE from "three";
+import GameObject from "./game-object";
 
-export default class Gun extends THREE.Group {
+export default class Gun extends GameObject {
   static modelName = "gun.obj";
 
   constructor(game) {
-    super();
+    super(game);
 
     this.model = game.models.get(Gun.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
@@ -28,5 +29,11 @@ export default class Gun extends THREE.Group {
     this.frontPosition = new THREE.Vector3(0, 0, this.worldToLocal(this.model.bbox.max).z);
 
     this.add(this.model);
+  }
+
+  update(elapsedTime, delta) {
+    super.update(elapsedTime, delta);
+
+    this.lookAt(this.game.mouse.getPosition(this.game.maxWorldDepth));
   }
 }

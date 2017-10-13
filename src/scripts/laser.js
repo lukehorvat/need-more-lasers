@@ -1,12 +1,14 @@
 import * as THREE from "three";
+import GameObject from "./game-object";
+import Enemy from "./enemy";
 
-export default class Laser extends THREE.Group {
+export default class Laser extends GameObject {
   static modelName = "laser.obj";
   static fireSoundName = "laser.ogg";
   static range = 2000;
 
   constructor(game) {
-    super();
+    super(game);
 
     this.speed = 500;
     this.model = game.models.get(Laser.modelName);
@@ -26,5 +28,28 @@ export default class Laser extends THREE.Group {
     this.frontPosition = new THREE.Vector3(0, 0, this.worldToLocal(this.model.bbox.max).z);
 
     this.add(this.model);
+  }
+
+  spawn(elapsedTime) {
+    super.spawn(elapsedTime);
+
+    this.lookAt(this.game.mouse.getPosition(this.game.maxWorldDepth));
+  }
+
+  update(elapsedTime, delta) {
+    super.update(elapsedTime, delta);
+
+    if (this.getWorldPosition().z > this.game.maxWorldDepth) {
+      this.position.addScaledVector(this.getWorldDirection(), this.speed * delta);
+
+      let enemy = this.game.enemies.find(enemy => enemy.bbox.containsPoint(this.localToWorld(this.frontPosition.clone())));
+      if (enemy) {
+        this.game.scene.remove(this, enemy);
+        this.game.killCounter.increment();
+        this.game.sounds.get(Enemy.explosionSoundName).play({ volume: 20 });
+      }
+    } else {
+      this.game.scene.remove(this);
+    }
   }
 }
