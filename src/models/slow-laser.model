@@ -1,0 +1,12 @@
+# Made using Asset Forge (1.2.1)
+
+:models
+Primitives/cylinder_cone[(0, 0, 2.9);(270.0, 0.0, 0.0);(0.2, 5.8, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+Primitives/sphere_dome[(1.86E-08, 0, 2.9);(90.0, 0.0, 0.0);(0.2, 0.2, 0.2);(0.0, 0.0, 0.0);_defaultMat]
+
+:materials
+_defaultMat[RGBA(1.000, 1.000, 1.000, 1.000);]
+
+:textures
+
+:extra

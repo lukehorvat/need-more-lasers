@@ -13,7 +13,7 @@ export default class PowerUp extends GameObject {
     this.speed = random(150, 300);
     this.model = game.models.get(PowerUp.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
-      mesh.material = new THREE.MeshPhysicalMaterial({ color: "#1F8DDB", reflectivity: 0.7, metalness: 0.6 });
+      mesh.material = new THREE.MeshPhysicalMaterial({ color: "#1d5cc2", reflectivity: 0.7, metalness: 0.6 });
     });
     this.model.scale.x = this.model.scale.y = this.model.scale.z = 10;
 

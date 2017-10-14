@@ -4,7 +4,6 @@ import GameObject from "./game-object";
 
 export default class Enemy extends GameObject {
   static killSoundNames = [
-    "congratulations.ogg",
     "eliminated.ogg",
     "fantastic.ogg",
     "flawless.ogg",

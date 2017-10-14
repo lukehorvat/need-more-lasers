@@ -11,6 +11,8 @@ import Reticule from "./reticule";
 import KillCounter from "./kill-counter";
 import Player from "./player";
 import Laser from "./laser";
+import SlowLaser from "./slow-laser";
+import FastLaser from "./fast-laser";
 import Enemy from "./enemy";
 import SlowEnemy from "./slow-enemy";
 import FastEnemy from "./fast-enemy";
@@ -34,7 +36,8 @@ export default class Game {
     .then(() => (
       this.models.init([
         Reticule.modelName,
-        Laser.modelName,
+        SlowLaser.modelName,
+        FastLaser.modelName,
         SlowEnemy.modelName,
         FastEnemy.modelName,
         PowerUp.modelName,
@@ -44,8 +47,9 @@ export default class Game {
     )).then(() => (
       this.sounds.init([
         Game.startSoundName,
+        SlowLaser.soundName,
+        FastLaser.soundName,
         ...Enemy.killSoundNames,
-        Laser.fireSoundName,
         PowerUp.acquireSoundName,
         PowerUp.enableSoundName,
         Explosion.soundName,
