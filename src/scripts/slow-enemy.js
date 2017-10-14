@@ -14,9 +14,9 @@ export default class SlowEnemy extends Enemy {
       mesh.material = (() => {
         switch (mesh.name) {
           case "pipe":
-          case "body": return new THREE.MeshPhysicalMaterial({ color: "#202757", reflectivity: 0.8, metalness: 0.4, });
-          case "metal": return new THREE.MeshPhysicalMaterial({ color: "#4E2F63", reflectivity: 0.1, metalness: 0.7, });
-          case "glass": return new THREE.MeshPhysicalMaterial({ color: "#2F3563", reflectivity: 0.9, metalness: 0.3, });
+          case "body": return new THREE.MeshPhysicalMaterial({ color: "#202757", reflectivity: 0.8, metalness: 0.8, });
+          case "metal": return new THREE.MeshPhysicalMaterial({ color: "#4e2f63", reflectivity: 0.1, metalness: 0.7, });
+          case "glass": return new THREE.MeshPhysicalMaterial({ color: "#2f3563", reflectivity: 0.9, metalness: 0.5, });
         }
       })();
     });

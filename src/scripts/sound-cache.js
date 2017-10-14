@@ -9,26 +9,27 @@ export default class SoundCache extends Map {
     this.path = path;
   }
 
-  init(soundNames) {
-    return Promise.resolve(Array.from(new Set(soundNames))).then(each(soundName => this.set(soundName)));
+  init(soundNames = []) {
+    return new Promise(resolve => {
+      soundManager.setup({ onready: resolve, debugMode: false, });
+    }).then(() => (
+      Promise.resolve(Array.from(new Set(soundNames))).then(each(soundName => this.set(soundName)))
+    ));
   }
 
   set(soundName, sound) {
     if (sound) return super.set(soundName, sound);
 
     return new Promise(resolve => {
-      if (soundManager.ok()) resolve();
-      else soundManager.setup({ onready: resolve });
-    }).then(() => (
-      new Promise(resolve => {
-        let sound = soundManager.createSound({
-          id: `sound#${soundName}`,
-          url: `${this.path}/${soundName}`,
-          autoLoad: true,
-          onload: resolve
-        });
-        this.set(soundName, sound);
-      })
-    ));
+      let sound = soundManager.createSound({
+        id: `sound#${soundName}`,
+        url: `${this.path}/${soundName}`,
+        autoLoad: true,
+        onload: () => {
+          this.set(soundName, sound);
+          resolve();
+        }
+      });
+    });
   }
 }

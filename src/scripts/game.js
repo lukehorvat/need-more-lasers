@@ -14,21 +14,12 @@ import Laser from "./laser";
 import Enemy from "./enemy";
 import SlowEnemy from "./slow-enemy";
 import FastEnemy from "./fast-enemy";
+import PowerUp from "./power-up";
 import Explosion from "./explosion";
 import Particle from "./particle";
 
 export default class Game {
   static startSoundName = "start.ogg";
-  static complimentSoundNames = [
-    "congratulations.ogg",
-    "eliminated.ogg",
-    "fantastic.ogg",
-    "flawless.ogg",
-    "perfect.ogg",
-    "target-destroyed.ogg",
-    "target-eliminated.ogg",
-    "well-done.ogg",
-  ];
 
   constructor(domElement, modelsPath, soundsPath, fontsPath) {
     this.domElement = domElement;
@@ -46,14 +37,17 @@ export default class Game {
         Laser.modelName,
         SlowEnemy.modelName,
         FastEnemy.modelName,
+        PowerUp.modelName,
         Explosion.modelName,
         Particle.modelName,
       ])
     )).then(() => (
       this.sounds.init([
         Game.startSoundName,
-        ...Game.complimentSoundNames,
+        ...Enemy.killSoundNames,
         Laser.fireSoundName,
+        PowerUp.acquireSoundName,
+        PowerUp.enableSoundName,
         Explosion.soundName,
       ])
     )).then(() => (
@@ -116,10 +110,11 @@ export default class Game {
   update() {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
-    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.explosions, ...this.particles];
+    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.powerUps, ...this.explosions, ...this.particles];
 
     objects.forEach(object => object.update(elapsedTime, delta));
 
+    // Spawn an enemy?
     if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
       let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
       enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
@@ -127,6 +122,15 @@ export default class Game {
       this.scene.add(enemy);
     }
 
+    // Spawn a power-up?
+    if (!this.powerUps.length && !this.player.poweredUp) {
+      let powerUp = new PowerUp(this, elapsedTime);
+      powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
+      powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
+      this.scene.add(powerUp);
+    }
+
+    // Spawn a particle?
     if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
       let particle = new Particle(this, elapsedTime);
       particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
@@ -146,6 +150,10 @@ export default class Game {
 
   get enemies() {
     return this.scene.children.filter(child => child instanceof Enemy);
+  }
+
+  get powerUps() {
+    return this.scene.children.filter(child => child instanceof PowerUp);
   }
 
   get explosions() {

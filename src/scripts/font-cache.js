@@ -9,7 +9,7 @@ export default class FontCache extends Map {
     this.path = path;
   }
 
-  init(fontNames) {
+  init(fontNames = []) {
     return Promise.resolve(Array.from(new Set(fontNames))).then(each(fontName => this.set(fontName)));
   }
 
