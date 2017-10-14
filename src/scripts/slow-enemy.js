@@ -9,6 +9,7 @@ export default class SlowEnemy extends Enemy {
     super(game, elapsedTime);
 
     this.speed = random(50, 100);
+    this.score = 10;
     this.model = game.models.get(SlowEnemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = (() => {

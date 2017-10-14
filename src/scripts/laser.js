@@ -16,7 +16,7 @@ export default class Laser extends GameObject {
       let enemy = this.game.enemies.find(enemy => enemy.bbox.containsPoint(this.localToWorld(this.frontPosition.clone())));
       if (enemy) {
         this.game.scene.remove(this, enemy);
-        this.game.killCounter.increment();
+        this.game.score.increment(enemy.score);
         this.game.sounds.get(Explosion.soundName).play({ volume: random(20, 40) });
 
         let explosion = new Explosion(this.game, elapsedTime);
@@ -32,6 +32,7 @@ export default class Laser extends GameObject {
         let powerUp = this.game.powerUps.find(powerUp => powerUp.bbox.containsPoint(this.localToWorld(this.frontPosition.clone())));
         if (powerUp) {
           this.game.scene.remove(this, powerUp);
+          this.game.score.increment(powerUp.score);
           this.game.sounds.get(PowerUp.acquireSoundName).play({ volume: 40 });
           this.game.player.poweredUp = true;
           setTimeout(() => this.game.sounds.get(PowerUp.enableSoundName).play({ volume: 80 }), 1000);

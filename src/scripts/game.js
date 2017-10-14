@@ -8,7 +8,7 @@ import FontCache from "./font-cache";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import Reticule from "./reticule";
-import KillCounter from "./kill-counter";
+import Score from "./score";
 import Player from "./player";
 import Laser from "./laser";
 import SlowLaser from "./slow-laser";
@@ -56,7 +56,7 @@ export default class Game {
       ])
     )).then(() => (
       this.fonts.init([
-        KillCounter.fontName,
+        Score.fontName,
       ])
     )).then(() => {
       ThreeExtensions.install();
@@ -85,9 +85,9 @@ export default class Game {
     this.reticule = new Reticule(this);
     this.scene.add(this.reticule);
 
-    this.killCounter = new KillCounter(this);
-    this.killCounter.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: Compute position from visible rectangle at this depth.
-    this.scene.add(this.killCounter);
+    this.score = new Score(this);
+    this.score.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: Compute position from visible rectangle at this depth.
+    this.scene.add(this.score);
 
     this.player = new Player(this);
     this.player.position.copy(this.camera.position);
