@@ -21,9 +21,11 @@ import FastEnemy from "./fast-enemy";
 import PowerUp from "./power-up";
 import Explosion from "./explosion";
 import Particle from "./particle";
+import EndMessage from "./end-message";
 
 export default class Game {
   static startSoundName = "start.ogg";
+  static endSoundName = "end.ogg";
 
   constructor(domElement, modelsPath, soundsPath, fontsPath) {
     this.domElement = domElement;
@@ -49,6 +51,7 @@ export default class Game {
     )).then(() => (
       this.sounds.init([
         Game.startSoundName,
+        Game.endSoundName,
         SlowLaser.soundName,
         FastLaser.soundName,
         ...Enemy.killSoundNames,
@@ -60,6 +63,7 @@ export default class Game {
       this.fonts.init([
         Time.fontName,
         Score.fontName,
+        EndMessage.fontName,
       ])
     )).then(() => {
       ThreeExtensions.install();
@@ -122,42 +126,47 @@ export default class Game {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
 
-    if (this.time.remainingSeconds === 0) {
-      alert("GAME OVER");
-      return;
-    }
+    if (this.time.remainingSeconds !== 0) {
+      // Update all existing objects.
+      this.objects.forEach(object => object.update(elapsedTime, delta));
 
-    // Update all existing objects.
-    this.objects.forEach(object => object.update(elapsedTime, delta));
+      // Spawn a new enemy?
+      if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
+        let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
+        enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
+        enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
+        this.scene.add(enemy);
+      }
 
-    // Spawn a new enemy?
-    if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
-      let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
-      enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
-      enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
-      this.scene.add(enemy);
-    }
+      // Spawn a new power-up?
+      if (!this.powerUps.length && !this.player.poweredUp) {
+        let powerUp = new PowerUp(this, elapsedTime);
+        powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
+        powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
+        this.scene.add(powerUp);
+      }
 
-    // Spawn a new power-up?
-    if (!this.powerUps.length && !this.player.poweredUp) {
-      let powerUp = new PowerUp(this, elapsedTime);
-      powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
-      powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
-      this.scene.add(powerUp);
-    }
+      // Spawn a new particle?
+      if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
+        let particle = new Particle(this, elapsedTime);
+        particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
+        this.scene.add(particle);
+      }
 
-    // Spawn a new particle?
-    if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
-      let particle = new Particle(this, elapsedTime);
-      particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
-      this.scene.add(particle);
+      // Queue up the next update.
+      requestAnimationFrame(::this.update);
+    } else {
+      let endMessage = new EndMessage(this);
+      endMessage.position.copy(this.camera.position).add(new THREE.Vector3(0, 0, -3));
+      this.scene.add(endMessage);
+      this.scene.remove(this.time);
+      this.domElement.style.cursor = null;
+
+      setTimeout(() => this.sounds.get(Game.endSoundName).play({ volume: 80 }), 1500);
     }
 
     // Render the scene!
     this.renderer.render(this.scene, this.camera);
-
-    // Queue up the next render.
-    requestAnimationFrame(::this.update);
   }
 
   get objects() {
