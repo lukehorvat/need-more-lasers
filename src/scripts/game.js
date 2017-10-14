@@ -7,8 +7,10 @@ import SoundCache from "./sound-cache";
 import FontCache from "./font-cache";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
-import Reticule from "./reticule";
+import GameObject from "./game-object";
+import Time from "./time";
 import Score from "./score";
+import Reticule from "./reticule";
 import Player from "./player";
 import Laser from "./laser";
 import SlowLaser from "./slow-laser";
@@ -56,6 +58,7 @@ export default class Game {
       ])
     )).then(() => (
       this.fonts.init([
+        Time.fontName,
         Score.fontName,
       ])
     )).then(() => {
@@ -82,12 +85,16 @@ export default class Game {
 
     this.clock = new THREE.Clock();
 
-    this.reticule = new Reticule(this);
-    this.scene.add(this.reticule);
+    this.time = new Time(this);
+    this.time.position.copy(this.camera.position).add(new THREE.Vector3(0, 2, -3)); // TODO: Compute position from visible rectangle at this depth.
+    this.scene.add(this.time);
 
     this.score = new Score(this);
     this.score.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: Compute position from visible rectangle at this depth.
     this.scene.add(this.score);
+
+    this.reticule = new Reticule(this);
+    this.scene.add(this.reticule);
 
     this.player = new Player(this);
     this.player.position.copy(this.camera.position);
@@ -114,11 +121,16 @@ export default class Game {
   update() {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
-    let objects = [this.reticule, this.player, ...this.lasers, ...this.enemies, ...this.powerUps, ...this.explosions, ...this.particles];
 
-    objects.forEach(object => object.update(elapsedTime, delta));
+    if (this.time.remainingSeconds === 0) {
+      alert("GAME OVER");
+      return;
+    }
 
-    // Spawn an enemy?
+    // Update all existing objects.
+    this.objects.forEach(object => object.update(elapsedTime, delta));
+
+    // Spawn a new enemy?
     if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
       let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
       enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
@@ -126,7 +138,7 @@ export default class Game {
       this.scene.add(enemy);
     }
 
-    // Spawn a power-up?
+    // Spawn a new power-up?
     if (!this.powerUps.length && !this.player.poweredUp) {
       let powerUp = new PowerUp(this, elapsedTime);
       powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
@@ -134,7 +146,7 @@ export default class Game {
       this.scene.add(powerUp);
     }
 
-    // Spawn a particle?
+    // Spawn a new particle?
     if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
       let particle = new Particle(this, elapsedTime);
       particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
@@ -148,23 +160,27 @@ export default class Game {
     requestAnimationFrame(::this.update);
   }
 
+  get objects() {
+    return this.scene.children.filter(child => child instanceof GameObject);
+  }
+
   get lasers() {
-    return this.scene.children.filter(child => child instanceof Laser);
+    return this.objects.filter(child => child instanceof Laser);
   }
 
   get enemies() {
-    return this.scene.children.filter(child => child instanceof Enemy);
+    return this.objects.filter(child => child instanceof Enemy);
   }
 
   get powerUps() {
-    return this.scene.children.filter(child => child instanceof PowerUp);
+    return this.objects.filter(child => child instanceof PowerUp);
   }
 
   get explosions() {
-    return this.scene.children.filter(child => child instanceof Explosion);
+    return this.objects.filter(child => child instanceof Explosion);
   }
 
   get particles() {
-    return this.scene.children.filter(child => child instanceof Particle);
+    return this.objects.filter(child => child instanceof Particle);
   }
 }
