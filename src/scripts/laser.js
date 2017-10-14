@@ -23,7 +23,7 @@ export default class Laser extends GameObject {
         explosion.position.copy(enemy.getWorldPosition());
         this.game.scene.add(explosion);
 
-        if (random(0, 100) < 15) {
+        if (random(0, 100) < 10) {
           let soundName = Enemy.killSoundNames[random(0, Enemy.killSoundNames.length - 1)];
           setTimeout(() => this.game.sounds.get(soundName).play({ volume: 80 }), 1000);
         }
@@ -36,7 +36,7 @@ export default class Laser extends GameObject {
           this.game.sounds.get(PowerUp.acquireSoundName).play({ volume: 40 });
           this.game.player.poweredUp = true;
           setTimeout(() => this.game.sounds.get(PowerUp.enableSoundName).play({ volume: 80 }), 1000);
-          setTimeout(() => this.game.player.poweredUp = false, 20000);
+          setTimeout(() => this.game.player.poweredUp = false, 15000);
         }
       }
     } else {

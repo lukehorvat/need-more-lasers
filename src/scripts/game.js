@@ -139,7 +139,7 @@ export default class Game {
       }
 
       // Spawn a new power-up?
-      if (!this.powerUps.length && !this.player.poweredUp) {
+      if (!this.powerUps.length && !this.player.poweredUp && elapsedTime > 120) {
         let powerUp = new PowerUp(this, elapsedTime);
         powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
         powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
