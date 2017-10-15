@@ -18,3 +18,11 @@ $ npm start
 ```
 
 This installs all dependencies and serves the game on port 9000.
+
+## Links
+
+The 3D ship models and sound effects were sourced from [Kenney Game Assets](https://itch.io/s/6789/kenney-bundle) packs.
+
+I made the rest of the 3D models myself using [Asset Forge](https://kenney.itch.io/assetforge).
+
+The music is a fun little song I composed, and you can download it [here](https://soundcloud.com/lukehorvat/need-more-lasers). It is under a Creative Commons license, so feel free to use it in your own projects. 😎
