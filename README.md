@@ -1,4 +1,4 @@
-# Need More Lasers?
+# Need More Lasers? ![Status](https://img.shields.io/badge/status-work_in_progress-orange.svg?style=flat-square)
 
 An open-source, HTML5 space shooter game.
 
