@@ -16,7 +16,7 @@ export default class PowerUp extends GameObject {
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
       mesh.material = new THREE.MeshPhysicalMaterial({ color: "#1d5cc2", reflectivity: 0.7, metalness: 0.6 });
     });
-    this.model.scale.x = this.model.scale.y = this.model.scale.z = 10;
+    this.model.scale.x = this.model.scale.y = this.model.scale.z = 15;
 
     // Center the model in case it isn't already.
     this.model.bbox.getCenter(this.model.position).multiplyScalar(-1);

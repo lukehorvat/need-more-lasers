@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import WindowResize from "three-window-resize";
-import random from "lodash.random";
 import * as ThreeExtensions from "./three";
 import ModelCache from "./model-cache";
 import SoundCache from "./sound-cache";
@@ -8,6 +7,7 @@ import FontCache from "./font-cache";
 import Mouse from "./mouse";
 import Keyboard from "./keyboard";
 import GameObject from "./game-object";
+import Spawner from "./spawner";
 import Time from "./time";
 import Score from "./score";
 import Reticule from "./reticule";
@@ -89,6 +89,9 @@ export default class Game {
 
     this.clock = new THREE.Clock();
 
+    this.spawner = new Spawner(this, 0);
+    this.scene.add(this.spawner);
+
     this.time = new Time(this, 0);
     this.time.position.copy(this.camera.position).add(new THREE.Vector3(0, 2, -3)); // TODO: Compute position from visible rectangle at this depth.
     this.scene.add(this.time);
@@ -129,29 +132,6 @@ export default class Game {
     if (this.time.remainingSeconds > 0) {
       // Update all existing objects.
       this.objects.forEach(object => object.update(elapsedTime, delta));
-
-      // Spawn a new enemy?
-      if (!this.enemies.length || elapsedTime - this.enemies.pop().createdAt > 1) {
-        let enemy = new (random(0, 100) > 20 ? SlowEnemy : FastEnemy)(this, elapsedTime);
-        enemy.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
-        enemy.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
-        this.scene.add(enemy);
-      }
-
-      // Spawn a new power-up?
-      if (!this.powerUps.length && !this.player.poweredUp && elapsedTime > 60) {
-        let powerUp = new PowerUp(this, elapsedTime);
-        powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
-        powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
-        this.scene.add(powerUp);
-      }
-
-      // Spawn a new particle?
-      if (!this.particles.length || elapsedTime - this.particles.pop().createdAt > 0.01) {
-        let particle = new Particle(this, elapsedTime);
-        particle.position.copy(new THREE.Vector3(this.camera.position.x + random(-30, 30), this.camera.position.y + random(-20, 20), this.camera.position.z - 50));
-        this.scene.add(particle);
-      }
 
       // Queue up the next update.
       requestAnimationFrame(::this.update);

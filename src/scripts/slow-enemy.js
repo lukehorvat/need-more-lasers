@@ -8,7 +8,7 @@ export default class SlowEnemy extends Enemy {
   constructor(game, elapsedTime) {
     super(game, elapsedTime);
 
-    this.speed = random(50, 100);
+    this.speed = random(50, 125);
     this.score = 10;
     this.model = game.models.get(SlowEnemy.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
