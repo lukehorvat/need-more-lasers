@@ -4,6 +4,8 @@ An open-source, HTML5 space shooter game.
 
 Live version hosted [here](https://lukehorvat.github.io/need-more-lasers).
 
+![](https://i.imgur.com/kV1BRWW.png)
+
 ## Setup
 
 To run a local instance, issue the following commands:
