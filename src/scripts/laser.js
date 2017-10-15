@@ -23,7 +23,7 @@ export default class Laser extends GameObject {
         explosion.position.copy(enemy.getWorldPosition());
         this.game.scene.add(explosion);
 
-        if (random(0, 100) < 10) {
+        if (random(0, 100) < 15) {
           let soundName = Enemy.killSoundNames[random(0, Enemy.killSoundNames.length - 1)];
           setTimeout(() => this.game.sounds.get(soundName).play({ volume: 80 }), 1000);
         }
