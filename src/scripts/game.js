@@ -24,6 +24,7 @@ import Particle from "./particle";
 import EndMessage from "./end-message";
 
 export default class Game {
+  static musicSoundName = "music.ogg";
   static startSoundName = "start.ogg";
   static endSoundName = "end.ogg";
 
@@ -50,6 +51,7 @@ export default class Game {
       ])
     )).then(() => (
       this.sounds.init([
+        Game.musicSoundName,
         Game.startSoundName,
         Game.endSoundName,
         SlowLaser.soundName,
@@ -120,8 +122,8 @@ export default class Game {
     this.light3.angle = THREE.Math.degToRad(90);
     this.scene.add(this.light3);
 
-    this.sounds.get(Game.startSoundName).play({ volume: 80 });
-
+    setTimeout(() => this.sounds.get(Game.startSoundName).play({ volume: 80 }), 1500);
+    this.playMusic();
     this.update();
   }
 
@@ -142,11 +144,20 @@ export default class Game {
       this.scene.remove(this.time);
       this.domElement.style.cursor = null;
 
+      this.stopMusic();
       setTimeout(() => this.sounds.get(Game.endSoundName).play({ volume: 80 }), 1500);
     }
 
     // Render the scene!
     this.renderer.render(this.scene, this.camera);
+  }
+
+  playMusic() {
+    this.sounds.get(Game.musicSoundName).play({ volume: 30, onfinish: ::this.playMusic });
+  }
+
+  stopMusic() {
+    this.sounds.get(Game.musicSoundName).stop();
   }
 
   get objects() {
