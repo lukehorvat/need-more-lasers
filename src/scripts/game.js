@@ -89,18 +89,18 @@ export default class Game {
 
     this.clock = new THREE.Clock();
 
-    this.time = new Time(this);
+    this.time = new Time(this, 0);
     this.time.position.copy(this.camera.position).add(new THREE.Vector3(0, 2, -3)); // TODO: Compute position from visible rectangle at this depth.
     this.scene.add(this.time);
 
-    this.score = new Score(this);
+    this.score = new Score(this, 0);
     this.score.position.copy(this.camera.position).add(new THREE.Vector3(0, -2, -3)); // TODO: Compute position from visible rectangle at this depth.
     this.scene.add(this.score);
 
-    this.reticule = new Reticule(this);
+    this.reticule = new Reticule(this, 0);
     this.scene.add(this.reticule);
 
-    this.player = new Player(this);
+    this.player = new Player(this, 0);
     this.player.position.copy(this.camera.position);
     this.scene.add(this.player);
 
@@ -126,7 +126,7 @@ export default class Game {
     let delta = this.clock.getDelta();
     let elapsedTime = this.clock.getElapsedTime();
 
-    if (this.time.remainingSeconds !== 0) {
+    if (this.time.remainingSeconds > 0) {
       // Update all existing objects.
       this.objects.forEach(object => object.update(elapsedTime, delta));
 
@@ -139,7 +139,7 @@ export default class Game {
       }
 
       // Spawn a new power-up?
-      if (!this.powerUps.length && !this.player.poweredUp && elapsedTime > 120) {
+      if (!this.powerUps.length && !this.player.poweredUp && elapsedTime > 60) {
         let powerUp = new PowerUp(this, elapsedTime);
         powerUp.position.copy(new THREE.Vector3(this.camera.position.x + random(-500, 500), this.camera.position.y + random(-200, 200), this.camera.position.z - this.camera.far));
         powerUp.lookAt(new THREE.Vector3(random(-500, 500), random(-200, 200), this.camera.position.z));
@@ -156,7 +156,7 @@ export default class Game {
       // Queue up the next update.
       requestAnimationFrame(::this.update);
     } else {
-      let endMessage = new EndMessage(this);
+      let endMessage = new EndMessage(this, elapsedTime);
       endMessage.position.copy(this.camera.position).add(new THREE.Vector3(0, 0, -3));
       this.scene.add(endMessage);
       this.scene.remove(this.time);

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export default class GameObject extends THREE.Group {
-  constructor(game, elapsedTime = 0) {
+  constructor(game, elapsedTime) {
     super();
 
     this.game = game;

@@ -11,7 +11,7 @@ export default class SlowLaser extends Laser {
     this.speed = 500;
     this.model = game.models.get(SlowLaser.modelName);
     this.model.children.filter(child => child instanceof THREE.Mesh).forEach(mesh => {
-      mesh.material = new THREE.MeshPhysicalMaterial({ color: "#ff2121", reflectivity: 1, metalness: 0, });
+      mesh.material = new THREE.MeshPhysicalMaterial({ color: "#ff0f0f", reflectivity: 1, metalness: 0, });
     });
     this.model.scale.x = this.model.scale.y = this.model.scale.z = 10;
 
