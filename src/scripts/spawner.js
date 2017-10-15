@@ -32,8 +32,8 @@ export default class Spawner extends GameObject {
   spawnEnemy(elapsedTime) {
     let originZ = this.game.camera.position.z - this.game.camera.far - 50;
     let originVisibleRect = this.game.camera.visibleRect(originZ);
-    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x);
-    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y);
+    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x) * 0.95;
+    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y) * 0.95;
     let destinationZ = this.game.camera.position.z - (this.game.camera.far / 6);
     let destinationVisibleRect = this.game.camera.visibleRect(destinationZ);
     let destinationX = random(destinationVisibleRect.min.x, destinationVisibleRect.max.x);
@@ -47,8 +47,8 @@ export default class Spawner extends GameObject {
   spawnPowerUp(elapsedTime) {
     let originZ = this.game.camera.position.z - this.game.camera.far - 50;
     let originVisibleRect = this.game.camera.visibleRect(originZ);
-    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x);
-    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y);
+    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x) * 0.75;
+    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y) * 0.75;
     let destinationZ = this.game.camera.position.z - (this.game.camera.far / 10);
     let destinationVisibleRect = this.game.camera.visibleRect(destinationZ);
     let destinationX = random(destinationVisibleRect.min.x, destinationVisibleRect.max.x);
@@ -62,8 +62,8 @@ export default class Spawner extends GameObject {
   spawnParticle(elapsedTime) {
     let originZ = this.game.camera.position.z - (this.game.camera.far / 40);
     let originVisibleRect = this.game.camera.visibleRect(originZ);
-    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x) / 2;
-    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y) / 2;
+    let originX = random(originVisibleRect.min.x, originVisibleRect.max.x) * 0.5;
+    let originY = random(originVisibleRect.min.y, originVisibleRect.max.y) * 0.5;
     let particle = new Particle(this.game, elapsedTime);
     particle.position.copy(new THREE.Vector3(originX, originY, originZ));
     this.game.scene.add(particle);
