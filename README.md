@@ -2,7 +2,7 @@
 
 An open-source, HTML5 space shooter game.
 
-Live version hosted [here](https://lukehorvat.github.io/need-more-lasers).
+Latest version hosted [here](https://lasers.js.org).
 
 ![](https://i.imgur.com/kV1BRWW.png)
 
