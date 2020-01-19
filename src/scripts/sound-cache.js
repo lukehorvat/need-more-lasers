@@ -1,4 +1,3 @@
-import Map from "es6-map/polyfill"; // Chrome has problems with extending Map. :(
 import { soundManager } from "soundmanager2";
 import each from "promise-each";
 
