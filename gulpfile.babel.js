@@ -3,7 +3,8 @@ import gutil from "gulp-util";
 import filter from "gulp-filter";
 import inject from "gulp-inject";
 import livereload from "gulp-livereload";
-import uglify from "gulp-uglify";
+import uglify from "gulp-uglify/composer";
+import uglifyES from "uglify-es";
 import cleanCSS from "gulp-clean-css";
 import sass from "gulp-sass";
 import autoprefixer from "gulp-autoprefixer";
@@ -32,8 +33,8 @@ let config = {
   misc: [
     "src/images/**/*.{ico,gif,jpg,png}",
     "src/sounds/**/*.{mp3,ogg}",
-    "src/models/**/*.obj",
     "src/fonts/**/*.json",
+    "src/models/**/*.obj",
   ],
   environments: [{
     name: "development",
@@ -41,7 +42,7 @@ let config = {
   }, {
     name: "production",
     minify: true,
-  }]
+  }],
 };
 
 let server = http.createServer(express().use(express.static(config.buildDir)));
@@ -83,7 +84,7 @@ gulp.task("build-scripts", () => {
     })
     .pipe(source(`${env.name}.js`)) // Convert from Browserify stream to vinyl stream.
     .pipe(buffer()) // Convert from streaming mode to buffered mode.
-    .pipe(gulpif(env.minify, uglify({ mangle: false })))
+    .pipe(gulpif(env.minify, uglify(uglifyES, gutil.log)({ mangle: false })))
     .pipe(rev())
     .pipe(gulp.dest(`${config.buildDir}/scripts`));
 });
@@ -97,7 +98,7 @@ gulp.task("build-styles", () => {
       this.emit("end");
     }))
     .pipe(rename(`${env.name}.css`))
-    .pipe(autoprefixer({ browsers: ["> 1%"] }))
+    .pipe(autoprefixer())
     .pipe(gulpif(env.minify, cleanCSS()))
     .pipe(rev())
     .pipe(gulp.dest(`${config.buildDir}/styles`));
@@ -106,8 +107,8 @@ gulp.task("build-styles", () => {
 gulp.task("build-misc", () => {
   let imagesFilter = filter("**/*.{ico,gif,jpg,png}", { restore: true });
   let soundsFilter = filter("**/*.{mp3,ogg}", { restore: true });
-  let modelsFilter = filter("**/*.obj", { restore: true });
   let fontsFilter = filter("**/*.json", { restore: true });
+  let modelsFilter = filter("**/*.obj", { restore: true });
 
   return gulp
     .src(config.misc)
@@ -117,12 +118,12 @@ gulp.task("build-misc", () => {
     .pipe(soundsFilter)
     .pipe(gulp.dest(`${config.buildDir}/sounds`))
     .pipe(soundsFilter.restore)
-    .pipe(modelsFilter)
-    .pipe(gulp.dest(`${config.buildDir}/models`))
-    .pipe(modelsFilter.restore)
     .pipe(fontsFilter)
     .pipe(gulp.dest(`${config.buildDir}/fonts`))
-    .pipe(fontsFilter.restore);
+    .pipe(fontsFilter.restore)
+    .pipe(modelsFilter)
+    .pipe(gulp.dest(`${config.buildDir}/models`))
+    .pipe(modelsFilter.restore);
 });
 
 gulp.task("build-index", () => {
